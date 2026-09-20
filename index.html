@@ -1,0 +1,4305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Whimsy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#FBF4ED;
+    --cream-deep:#F5E9DE;
+    --plum:#4A3B47;
+    --plum-soft:#7A6874;
+    --mauve:#B784A7;
+    --apricot:#E8A87C;
+    --dusk-blue:#7EA8BE;
+    --sage:#9CAE8C;
+    --gold:#D9A441;
+    --white:#FFFFFF;
+  }
+  :root:not([data-theme="light"]){
+    @media (prefers-color-scheme: dark){
+      --cream:#241E22;
+      --cream-deep:#2E262B;
+      --plum:#F3E9EE;
+      --plum-soft:#C9B8C3;
+      --white:#332B30;
+    }
+  }
+  :root[data-theme="dark"]{
+    --cream:#241E22;
+    --cream-deep:#2E262B;
+    --plum:#F3E9EE;
+    --plum-soft:#C9B8C3;
+    --white:#332B30;
+  }
+
+  body[data-bg="pink"]{
+    --cream:#FDF0F5;
+    --cream-deep:#F9DCE6;
+  }
+  body[data-bg="lavender"]{
+    --cream:#F3F0FB;
+    --cream-deep:#E6DEF6;
+  }
+  body[data-bg="mint"]{
+    --cream:#EEFAF3;
+    --cream-deep:#DBF2E5;
+  }
+  body[data-bg="peach"]{
+    --cream:#FFF1E5;
+    --cream-deep:#FFE1CC;
+  }
+  body[data-bg="sky"]{
+    --cream:#EDF6FB;
+    --cream-deep:#DBEEFA;
+  }
+  body[data-bg="butter"]{
+    --cream:#FEF9E7;
+    --cream-deep:#FBF0C7;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;
+    padding:0;
+    width:100%;
+    min-height:100%;
+    overflow-x:hidden;
+  }
+  body{
+    background:var(--cream);
+    color:var(--plum);
+    font-family:'Quicksand', sans-serif;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    position:relative;
+    transition:background .4s ease;
+  }
+
+  /* ---------- floating sky decoration ---------- */
+  .refresh-clouds{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:50;
+    overflow:hidden;
+  }
+  .cloud-blob{
+    position:absolute;
+    width:140vmax;
+    height:140vmax;
+    border-radius:50%;
+    background:radial-gradient(circle at 35% 35%, #ffffff, var(--cream) 65%, var(--cream-deep) 100%);
+    opacity:0;
+    transform:scale(0);
+  }
+  .cloud-blob.tl{ top:-70vmax; left:-70vmax; transform-origin:top left; }
+  .cloud-blob.tr{ top:-70vmax; right:-70vmax; transform-origin:top right; }
+  .cloud-blob.bl{ bottom:-70vmax; left:-70vmax; transform-origin:bottom left; }
+  .cloud-blob.br{ bottom:-70vmax; right:-70vmax; transform-origin:bottom right; }
+
+  .refresh-clouds.active .cloud-blob{ animation:blob-cover 1.7s ease; }
+  .refresh-clouds.active .cloud-blob.tr{ animation-delay:.06s; }
+  .refresh-clouds.active .cloud-blob.bl{ animation-delay:.1s; }
+  .refresh-clouds.active .cloud-blob.br{ animation-delay:.04s; }
+
+  @keyframes blob-cover{
+    0%{ transform:scale(0); opacity:0; }
+    38%{ transform:scale(1); opacity:1; }
+    62%{ transform:scale(1); opacity:1; }
+    100%{ transform:scale(0); opacity:0; }
+  }
+
+  .refresh-clouds .drift-cloud{
+    position:absolute;
+    font-size:3.2rem;
+    opacity:0;
+  }
+  .refresh-clouds.active .drift-cloud{ animation:drift-cloud 1.7s ease; }
+  @keyframes drift-cloud{
+    0%{ opacity:0; transform:translateY(14px) scale(.8); }
+    38%{ opacity:0; }
+    46%{ opacity:.9; transform:translateY(0) scale(1); }
+    58%{ opacity:.9; transform:translateY(0) scale(1); }
+    68%{ opacity:0; }
+    100%{ opacity:0; transform:translateY(-10px) scale(.8); }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .refresh-clouds.active .cloud-blob,
+    .refresh-clouds.active .drift-cloud{ animation:none !important; }
+  }
+
+  .refresh-btn{
+    position:fixed;
+    left:22px;
+    top:22px;
+    z-index:8;
+    width:44px;
+    height:44px;
+    border-radius:50%;
+    border:1.5px solid var(--cream-deep);
+    background:var(--white);
+    color:var(--mauve);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    font-size:1.1rem;
+    box-shadow:0 6px 18px rgba(74,59,71,.12);
+    transition:transform .35s ease, box-shadow .2s ease;
+  }
+  .refresh-btn:hover{
+    box-shadow:0 8px 22px rgba(74,59,71,.16);
+  }
+  .refresh-btn:active svg{
+    transform:rotate(180deg);
+  }
+  .refresh-btn svg{
+    transition:transform .35s ease;
+  }
+
+  .settings-btn, .music-btn{
+    position:fixed;
+    bottom:22px;
+    z-index:8;
+    width:46px;
+    height:46px;
+    border-radius:50%;
+    border:1.5px solid var(--cream-deep);
+    background:var(--white);
+    color:var(--mauve);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    font-size:1.15rem;
+    box-shadow:0 6px 18px rgba(74,59,71,.12);
+    transition:transform .2s ease, box-shadow .2s ease;
+  }
+  .settings-btn{ right:22px; }
+  .music-btn{ right:78px; }
+  .settings-btn:hover{
+    transform:rotate(25deg) scale(1.06);
+    box-shadow:0 8px 22px rgba(74,59,71,.16);
+  }
+  .music-btn:hover{
+    transform:scale(1.08);
+    box-shadow:0 8px 22px rgba(74,59,71,.16);
+  }
+  .music-btn.playing{
+    color:var(--apricot);
+    animation:music-pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes music-pulse{
+    0%, 100%{ box-shadow:0 6px 18px rgba(74,59,71,.12); }
+    50%{ box-shadow:0 6px 22px rgba(232,168,124,.35); }
+  }
+
+  .settings-panel{
+    position:fixed;
+    right:22px;
+    bottom:78px;
+    z-index:8;
+    background:var(--white);
+    border:1.5px solid var(--cream-deep);
+    border-radius:18px;
+    padding:16px 18px;
+    box-shadow:0 14px 34px rgba(74,59,71,.18);
+    animation:pop-in .18s ease;
+    min-width:190px;
+  }
+  .settings-panel[hidden]{ display:none; }
+  .settings-title{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-size:.92rem;
+    color:var(--plum-soft);
+    margin:0 0 12px;
+  }
+  .swatch-row{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:10px;
+  }
+  .swatch{
+    width:32px;
+    height:32px;
+    border-radius:50%;
+    border:2px solid rgba(74,59,71,.12);
+    cursor:pointer;
+    padding:0;
+    transition:transform .15s ease, border-color .15s ease;
+  }
+  .swatch:hover{ transform:scale(1.12); }
+  .swatch.active{ border-color:var(--plum); }
+  .swatch[data-bg="default"]{ background:#FBF4ED; }
+  .swatch[data-bg="pink"]{ background:#FDF0F5; }
+  .swatch[data-bg="lavender"]{ background:#F3F0FB; }
+  .swatch[data-bg="mint"]{ background:#EEFAF3; }
+  .swatch[data-bg="peach"]{ background:#FFF1E5; }
+  .swatch[data-bg="sky"]{ background:#EDF6FB; }
+  .swatch[data-bg="butter"]{ background:#FEF9E7; }
+
+  .modal-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(74,59,71,.28);
+    backdrop-filter:blur(2px);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    z-index:10;
+    animation:fade-in .2s ease;
+  }
+  .modal-overlay[hidden]{
+    display:none;
+  }
+  @keyframes fade-in{
+    from{ opacity:0; }
+    to{ opacity:1; }
+  }
+  .modal-card{
+    position:relative;
+    max-width:440px;
+    width:100%;
+    background:var(--white);
+    border-radius:20px;
+    padding:32px 30px 28px;
+    box-shadow:0 20px 50px rgba(74,59,71,.22);
+    animation:pop-in .22s ease;
+  }
+  .modal-close{
+    position:absolute;
+    top:14px;
+    right:16px;
+    background:none;
+    border:none;
+    font-size:1.4rem;
+    line-height:1;
+    color:var(--plum-soft);
+    cursor:pointer;
+    padding:4px;
+  }
+  .modal-close:hover{ color:var(--plum); }
+  .modal-title{
+    font-family:'Fraunces', serif;
+    font-weight:500;
+    font-style:italic;
+    color:var(--mauve);
+    font-size:1.4rem;
+    margin:0 0 14px;
+  }
+  .modal-text{
+    font-size:.98rem;
+    line-height:1.6;
+    color:var(--plum);
+    margin:0;
+  }
+
+  .sky{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    overflow:hidden;
+    z-index:0;
+  }
+  .sky svg{
+    position:absolute;
+    opacity:.55;
+  }
+  .sky svg.twinkle{
+    animation:twinkle 3.2s ease-in-out infinite;
+  }
+  @keyframes twinkle{
+    0%, 100%{ opacity:.25; transform:scale(.85); }
+    50%{ opacity:.7; transform:scale(1); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .sky svg.twinkle{ animation:none; opacity:.45; }
+  }
+
+  /* ---------- top bar ---------- */
+  header{
+    position:relative;
+    z-index:2;
+    display:flex;
+    justify-content:flex-end;
+    align-items:center;
+    gap:22px;
+    padding:20px 28px;
+    font-size:.92rem;
+    color:var(--plum-soft);
+  }
+  header a{
+    color:var(--plum-soft);
+    text-decoration:none;
+  }
+  header a:hover{ color:var(--plum); }
+  .avatar{
+    width:32px;
+    height:32px;
+    border-radius:50%;
+    background:linear-gradient(135deg, var(--apricot), var(--mauve));
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--white);
+    font-family:'Fraunces', serif;
+    font-size:.95rem;
+    font-style:italic;
+  }
+
+  /* ---------- main ---------- */
+  main{
+    position:relative;
+    z-index:2;
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:6vh 20px 8vh;
+    text-align:center;
+  }
+
+  .wordmark{
+    font-family:'Fraunces', serif;
+    font-weight:500;
+    font-size:clamp(3.4rem, 11vw, 5.6rem);
+    letter-spacing:.01em;
+    margin:0 0 6px;
+    line-height:1;
+    user-select:none;
+  }
+  .wordmark span{ display:inline-block; }
+  .wordmark .w1{ color:var(--mauve); }
+  .wordmark .w2{ color:var(--apricot); }
+  .wordmark .w3{ color:var(--dusk-blue); }
+  .wordmark .w4{ color:var(--gold); }
+  .wordmark .w5{ color:var(--sage); }
+  .wordmark .w6{ color:var(--mauve); }
+  .wordmark .dot{ color:var(--apricot); font-style:italic; }
+
+  .tagline{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-weight:400;
+    color:var(--plum-soft);
+    font-size:1.05rem;
+    margin:0 0 40px;
+  }
+
+  /* ---------- search ---------- */
+  .search-wrap{
+    width:100%;
+    max-width:560px;
+  }
+  .search-bar{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    background:var(--white);
+    border:1.5px solid var(--cream-deep);
+    border-radius:999px;
+    padding:14px 22px;
+    box-shadow:0 6px 20px rgba(74,59,71,.07);
+    transition:box-shadow .25s ease, border-color .25s ease, transform .25s ease;
+  }
+  .search-bar:hover{
+    box-shadow:0 10px 26px rgba(74,59,71,.11);
+  }
+  .search-bar:focus-within{
+    border-color:var(--mauve);
+    box-shadow:0 10px 28px rgba(183,132,167,.22);
+    transform:translateY(-1px);
+  }
+  .search-bar svg{
+    flex-shrink:0;
+    color:var(--mauve);
+  }
+  .search-bar input{
+    flex:1;
+    border:none;
+    outline:none;
+    background:transparent;
+    font-family:'Quicksand', sans-serif;
+    font-size:1.05rem;
+    font-weight:500;
+    color:var(--plum);
+  }
+  .search-bar input::placeholder{
+    color:var(--plum-soft);
+    opacity:.65;
+    font-weight:500;
+  }
+  .clear-btn{
+    background:none;
+    border:none;
+    cursor:pointer;
+    color:var(--plum-soft);
+    font-size:1.3rem;
+    line-height:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:22px;
+    height:22px;
+    padding:0;
+    border-radius:50%;
+    flex-shrink:0;
+    transition:color .15s ease, background .15s ease;
+  }
+  .clear-btn:hover{
+    color:var(--plum);
+    background:var(--cream-deep);
+  }
+  .clear-btn[hidden]{ display:none; }
+
+  .mic-btn{
+    background:none;
+    border:none;
+    cursor:pointer;
+    color:var(--apricot);
+    display:flex;
+    align-items:center;
+    padding:2px;
+  }
+
+  .answer-card{
+    position:relative;
+    text-align:left;
+    background:var(--white);
+    border:1.5px solid var(--cream-deep);
+    border-radius:16px;
+    padding:18px 40px 18px 22px;
+    margin-top:20px;
+    box-shadow:0 6px 20px rgba(74,59,71,.07);
+    animation:pop-in .25s ease;
+  }
+  @keyframes pop-in{
+    from{ opacity:0; transform:translateY(-6px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+  .answer-close{
+    position:absolute;
+    top:10px;
+    right:12px;
+    background:none;
+    border:none;
+    cursor:pointer;
+    color:var(--plum-soft);
+    font-size:1.3rem;
+    line-height:1;
+    width:24px;
+    height:24px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:color .15s ease, background .15s ease;
+  }
+  .answer-close:hover{
+    color:var(--plum);
+    background:var(--cream-deep);
+  }
+  .answer-label{
+    font-size:.78rem;
+    font-weight:600;
+    color:var(--mauve);
+    margin-bottom:8px;
+  }
+  .answer-q{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-size:1.02rem;
+    color:var(--plum-soft);
+    margin:0 0 6px;
+  }
+  .answer-a{
+    font-size:1rem;
+    line-height:1.5;
+    color:var(--plum);
+    margin:0;
+    white-space:pre-line;
+  }
+  .answer-link{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    margin-top:12px;
+    font-family:'Quicksand', sans-serif;
+    font-weight:600;
+    font-size:.92rem;
+    color:var(--white);
+    background:var(--mauve);
+    padding:9px 16px;
+    border-radius:10px;
+    text-decoration:none;
+    transition:transform .15s ease, background .15s ease;
+  }
+  .answer-link:hover{
+    background:var(--apricot);
+    transform:translateY(-1px);
+  }
+  .answer-link[hidden]{ display:none; }
+
+  .buttons{
+    display:flex;
+    gap:14px;
+    justify-content:center;
+    margin-top:28px;
+    flex-wrap:wrap;
+  }
+  .buttons button{
+    font-family:'Quicksand', sans-serif;
+    font-weight:600;
+    font-size:.92rem;
+    color:var(--plum);
+    background:var(--cream-deep);
+    border:none;
+    border-radius:10px;
+    padding:11px 20px;
+    cursor:pointer;
+    transition:transform .18s ease, background .18s ease, box-shadow .18s ease;
+  }
+  .buttons button:hover{
+    background:var(--white);
+    box-shadow:0 4px 14px rgba(74,59,71,.1);
+    transform:translateY(-2px);
+  }
+  .buttons button:active{ transform:translateY(0); }
+
+  .lang-row{
+    margin-top:30px;
+    font-size:.85rem;
+    color:var(--plum-soft);
+  }
+  .lang-row button{
+    background:none;
+    border:none;
+    color:var(--mauve);
+    font-weight:600;
+    cursor:pointer;
+    font-size:.85rem;
+    font-family:'Quicksand', sans-serif;
+    padding:0 3px;
+  }
+  .lang-row button:hover{ text-decoration:underline; }
+
+  /* ---------- footer ---------- */
+  footer{
+    position:relative;
+    z-index:2;
+    background:var(--cream-deep);
+    color:var(--plum-soft);
+    font-size:.85rem;
+  }
+  .foot-loc{
+    padding:14px 28px;
+    border-bottom:1px solid rgba(74,59,71,.08);
+  }
+  .foot-links{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:14px 28px;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  .foot-links .group{
+    display:flex;
+    gap:22px;
+    flex-wrap:wrap;
+  }
+  footer a{
+    color:var(--plum-soft);
+    text-decoration:none;
+  }
+  footer a:hover{ text-decoration:underline; }
+
+  @media (max-width:520px){
+    .foot-links{ flex-direction:column; align-items:flex-start; }
+    header{ padding:16px 18px; }
+    .search-bar{ padding:12px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="modal-overlay" id="aboutOverlay" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="aboutTitle">
+    <button type="button" class="modal-close" id="aboutClose" aria-label="Close">&times;</button>
+    <h2 id="aboutTitle" class="modal-title">About Whimsy</h2>
+    <p class="modal-text">Whimsy is a cute and colorful search webpage designed to make searching feel more fun and magical. 🔎✨ Users can type anything into the search bar and quickly find what they are looking for. With its soft pastel colors, playful design, and friendly layout, Whimsy turns a simple search into a fun little experience. 🌸🎀</p>
+  </div>
+</div>
+
+<div class="sky" id="sky"></div>
+
+<button type="button" class="refresh-btn" id="refreshBtn" aria-label="Refresh page">
+  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M20 12a8 8 0 1 1-2.34-5.66" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    <path d="M20 4v6h-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+</button>
+
+<div class="refresh-clouds" id="refreshClouds" aria-hidden="true">
+  <div class="cloud-blob tl"></div>
+  <div class="cloud-blob tr"></div>
+  <div class="cloud-blob bl"></div>
+  <div class="cloud-blob br"></div>
+  <span class="drift-cloud" style="top:14%; left:12%;">☁️</span>
+  <span class="drift-cloud" style="top:22%; right:16%; font-size:2.4rem;">☁️</span>
+  <span class="drift-cloud" style="top:48%; left:44%; font-size:3.8rem;">☁️</span>
+  <span class="drift-cloud" style="bottom:20%; left:20%; font-size:2.6rem;">☁️</span>
+  <span class="drift-cloud" style="bottom:16%; right:14%;">☁️</span>
+  <span class="drift-cloud" style="top:36%; left:70%; font-size:2.2rem;">☁️</span>
+</div>
+
+<header>
+  <a href="#" id="aboutLink">About</a>
+  <div class="avatar">✦</div>
+</header>
+
+<main>
+  <h1 class="wordmark" aria-label="Whimsy">
+    <span class="w1">W</span><span class="w2">h</span><span class="w3">i</span><span class="w4">m</span><span class="w5">s</span><span class="w6">y</span><span class="dot">.</span>
+  </h1>
+  <p class="tagline">a little corner of the internet made of stardust</p>
+
+  <div class="search-wrap">
+    <form class="search-bar" id="searchForm" role="search">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/>
+        <line x1="16.2" y1="16.2" x2="21" y2="21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <input
+        type="text"
+        id="searchInput"
+        placeholder="ask the stars something..."
+        autocomplete="off"
+        aria-label="Search Whimsy"
+      >
+      <button type="button" class="clear-btn" id="clearBtn" aria-label="Clear search" hidden>&times;</button>
+      <button type="button" class="mic-btn" aria-label="sparkle it up" id="sparkleBtn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M12 2l1.9 6.1L20 10l-6.1 1.9L12 18l-1.9-6.1L4 10l6.1-1.9L12 2z"/>
+        </svg>
+      </button>
+    </form>
+
+    <div class="answer-card" id="answerCard" hidden>
+      <button type="button" class="answer-close" id="answerClose" aria-label="Close">&times;</button>
+      <div class="answer-label">✦ Whimsy knows</div>
+      <p class="answer-q" id="answerQ"></p>
+      <p class="answer-a" id="answerA"></p>
+      <a href="#" target="_blank" rel="noopener" class="answer-link" id="answerLink" hidden>Open it ↗</a>
+    </div>
+
+    <div class="buttons">
+      <button type="button" id="searchBtn">Whimsy Search</button>
+      <button type="button" id="luckyBtn">I'm Feeling Whimsical</button>
+    </div>
+
+    <div class="lang-row">
+      Whimsy offered in:
+      <button type="button">dreamy</button>
+      <button type="button">cozy</button>
+      <button type="button">sparkly</button>
+    </div>
+  </div>
+</main>
+
+<button type="button" class="music-btn" id="musicBtn" aria-label="Toggle whimsy music">🎵</button>
+<button type="button" class="settings-btn" id="settingsBtn" aria-label="Settings">⚙️</button>
+<div class="settings-panel" id="settingsPanel" hidden>
+  <p class="settings-title">background color ✨</p>
+  <div class="swatch-row" id="swatchRow">
+    <button type="button" class="swatch active" data-bg="default" aria-label="Cream"></button>
+    <button type="button" class="swatch" data-bg="pink" aria-label="Pink"></button>
+    <button type="button" class="swatch" data-bg="lavender" aria-label="Lavender"></button>
+    <button type="button" class="swatch" data-bg="mint" aria-label="Mint"></button>
+    <button type="button" class="swatch" data-bg="peach" aria-label="Peach"></button>
+    <button type="button" class="swatch" data-bg="sky" aria-label="Sky"></button>
+    <button type="button" class="swatch" data-bg="butter" aria-label="Butter"></button>
+  </div>
+</div>
+
+<script>
+  // gently scatter twinkling stars and soft blobs across the page
+  (function(){
+    const sky = document.getElementById('sky');
+    const colors = ['#B784A7', '#E8A87C', '#7EA8BE', '#D9A441', '#9CAE8C'];
+    const starPositions = [
+      {x:'6%', y:'14%', s:14}, {x:'92%', y:'10%', s:10}, {x:'88%', y:'34%', s:16},
+      {x:'4%', y:'46%', s:11}, {x:'12%', y:'78%', s:13}, {x:'90%', y:'70%', s:12},
+      {x:'50%', y:'6%', s:9}, {x:'70%', y:'86%', s:10}, {x:'25%', y:'88%', s:8},
+      {x:'95%', y:'92%', s:11}
+    ];
+    starPositions.forEach((p, i) => {
+      const c = colors[i % colors.length];
+      const ns = 'http://www.w3.org/2000/svg';
+      const svg = document.createElementNS(ns, 'svg');
+      svg.setAttribute('width', p.s);
+      svg.setAttribute('height', p.s);
+      svg.setAttribute('viewBox', '0 0 24 24');
+      svg.setAttribute('fill', c);
+      svg.classList.add('twinkle');
+      svg.style.left = p.x;
+      svg.style.top = p.y;
+      svg.style.animationDelay = (i * 0.4) + 's';
+      svg.innerHTML = '<path d="M12 2l1.9 6.1L20 10l-6.1 1.9L12 18l-1.9-6.1L4 10l6.1-1.9L12 2z"/>';
+      sky.appendChild(svg);
+    });
+  })();
+
+  // Whimsy's own little book of answers
+  const whimsyAnswers = [
+    {
+      match: ['what is love', 'whats love', "what's love"],
+      question: 'What is love?',
+      answer: 'Love is a feeling that makes you show affection to others and makes your mind go crazy.'
+    },
+    {
+      match: ['how to impress someone', 'how do i impress someone', 'how to impress somebody'],
+      question: 'How to impress someone?',
+      answer: 'You should show them affection and try to make the bond stronger with them.'
+    },
+    {
+      match: ['why does arzish not have a linkedin account', 'why doesnt arzish have a linkedin account', "why doesn't arzish have a linkedin account"],
+      question: 'Why does Arzish not have a LinkedIn account?',
+      answer: 'Arzish is not old enough to create a LinkedIn account.'
+    },
+    {
+      match: ['2+2', '2 + 2', 'whats 2+2', "what's 2+2", 'what is 2+2'],
+      question: '2+2',
+      answer: '4'
+    },
+    {
+      match: ['what is the capital of france', 'capital of france'],
+      question: 'What is the capital of France?',
+      answer: 'Paris is the capital of France.'
+    },
+    {
+      match: ['how many planets are in the solar system', 'how many planets are there'],
+      question: 'How many planets are in the solar system?',
+      answer: 'There are eight planets in the solar system.'
+    },
+    {
+      match: ['who wrote romeo and juliet'],
+      question: 'Who wrote Romeo and Juliet?',
+      answer: 'William Shakespeare wrote Romeo and Juliet.'
+    },
+    {
+      match: ['what is the largest ocean', 'largest ocean in the world'],
+      question: 'What is the largest ocean?',
+      answer: 'The Pacific Ocean is the largest ocean on Earth.'
+    },
+    {
+      match: ['who was the first president of the united states', 'first president of the united states', 'first us president'],
+      question: 'Who was the first president of the United States?',
+      answer: 'George Washington was the first president of the United States.'
+    },
+    {
+      match: ['what is the tallest mountain in the world', 'tallest mountain in the world'],
+      question: 'What is the tallest mountain in the world?',
+      answer: 'Mount Everest is the tallest mountain in the world.'
+    },
+    {
+      match: ['how many continents are there'],
+      question: 'How many continents are there?',
+      answer: 'There are seven continents.'
+    },
+    {
+      match: ['what is the chemical symbol for gold', 'chemical symbol for gold'],
+      question: 'What is the chemical symbol for gold?',
+      answer: 'The chemical symbol for gold is Au.'
+    },
+    {
+      match: ['when did world war 2 end', 'when did world war two end', 'when did ww2 end'],
+      question: 'When did World War II end?',
+      answer: 'World War II ended in 1945.'
+    },
+    {
+      match: ['what is the smallest planet', 'smallest planet in the solar system'],
+      question: 'What is the smallest planet?',
+      answer: 'Mercury is the smallest planet in the solar system.'
+    },
+    {
+      match: ['who painted the mona lisa'],
+      question: 'Who painted the Mona Lisa?',
+      answer: 'Leonardo da Vinci painted the Mona Lisa.'
+    },
+    {
+      match: ['what is the longest river in the world', 'longest river in the world'],
+      question: 'What is the longest river in the world?',
+      answer: 'The Nile is generally considered the longest river in the world.'
+    },
+    {
+      match: ['how many bones are in the human body', 'how many bones does the human body have'],
+      question: 'How many bones are in the human body?',
+      answer: 'An adult human body has 206 bones.'
+    },
+    {
+      match: ['what is the boiling point of water', 'boiling point of water'],
+      question: 'What is the boiling point of water?',
+      answer: 'Water boils at 100 degrees Celsius (212 degrees Fahrenheit) at sea level.'
+    },
+    {
+      match: ['what is the speed of light', 'speed of light'],
+      question: 'What is the speed of light?',
+      answer: 'Light travels at about 299,792 kilometers per second in a vacuum.'
+    },
+    {
+      match: ['who developed the theory of general relativity', 'who came up with general relativity'],
+      question: 'Who developed the theory of general relativity?',
+      answer: 'Albert Einstein developed the theory of general relativity.'
+    },
+    {
+      match: ['what is the atomic number of oxygen', 'atomic number of oxygen'],
+      question: 'What is the atomic number of oxygen?',
+      answer: 'Oxygen has an atomic number of 8.'
+    },
+    {
+      match: ['what is the powerhouse of the cell', 'powerhouse of the cell'],
+      question: 'What is the powerhouse of the cell?',
+      answer: 'The mitochondria is known as the powerhouse of the cell.'
+    },
+    {
+      match: ['who discovered penicillin'],
+      question: 'Who discovered penicillin?',
+      answer: 'Alexander Fleming discovered penicillin in 1928.'
+    },
+    {
+      match: ["what is avogadro's number", 'what is avogadros number', 'avogadros number'],
+      question: "What is Avogadro's number?",
+      answer: "Avogadro's number is approximately 6.022 x 10^23."
+    },
+    {
+      match: ['who was the first emperor of rome', 'first roman emperor'],
+      question: 'Who was the first emperor of Rome?',
+      answer: 'Augustus was the first emperor of Rome.'
+    },
+    {
+      match: ['what year did the berlin wall fall', 'when did the berlin wall fall'],
+      question: 'What year did the Berlin Wall fall?',
+      answer: 'The Berlin Wall fell in 1989.'
+    },
+    {
+      match: ['what is the currency of japan', 'currency of japan'],
+      question: 'What is the currency of Japan?',
+      answer: 'The currency of Japan is the yen.'
+    },
+    {
+      match: ['who proposed the theory of evolution', 'who wrote the theory of evolution', 'who discovered evolution'],
+      question: 'Who proposed the theory of evolution by natural selection?',
+      answer: 'Charles Darwin proposed the theory of evolution by natural selection.'
+    },
+    {
+      match: ['what is the deepest point in the ocean', 'deepest part of the ocean'],
+      question: 'What is the deepest point in the ocean?',
+      answer: "The Mariana Trench's Challenger Deep is the deepest known point in the ocean."
+    },
+    {
+      match: ['what is the chemical formula for water', 'chemical formula for water'],
+      question: 'What is the chemical formula for water?',
+      answer: 'The chemical formula for water is H2O.'
+    },
+    {
+      match: ['how many chromosomes do humans have', 'how many chromosomes does a human have'],
+      question: 'How many chromosomes do humans have?',
+      answer: 'Humans typically have 46 chromosomes.'
+    },
+    {
+      match: ['what is the largest desert in the world', 'largest desert in the world'],
+      question: 'What is the largest desert in the world?',
+      answer: 'Antarctica is the largest desert in the world by area.'
+    },
+    {
+      match: ['who invented the telephone'],
+      question: 'Who invented the telephone?',
+      answer: 'Alexander Graham Bell is credited with inventing the telephone.'
+    },
+    {
+      match: ['what is the largest planet in our solar system', 'largest planet in the solar system', 'largest planet'],
+      question: 'What is the largest planet in our Solar System?',
+      answer: 'Jupiter is the largest planet in our Solar System.'
+    },
+    {
+      match: ['which planet rotates on its side', 'what planet rotates on its side', 'what planet spins on its side'],
+      question: 'Which planet rotates on its side?',
+      answer: 'Uranus rotates on its side.'
+    },
+    {
+      match: ['what is the hardest naturally occurring mineral', 'hardest naturally occurring mineral'],
+      question: 'What is the hardest naturally occurring mineral?',
+      answer: 'Diamond is the hardest naturally occurring mineral.'
+    },
+    {
+      match: ['which element has the chemical symbol w', 'what element has the chemical symbol w'],
+      question: 'Which element has the chemical symbol W?',
+      answer: 'Tungsten has the chemical symbol W.'
+    },
+    {
+      match: ["what is the deepest known point in earth's oceans", 'what is the deepest known point in earths oceans'],
+      question: "What is the deepest known point in Earth's oceans?",
+      answer: 'The Challenger Deep is the deepest known point in Earth\'s oceans.'
+    },
+    {
+      match: ['which ancient civilization built machu picchu', 'who built machu picchu'],
+      question: 'Which ancient civilization built Machu Picchu?',
+      answer: 'The Inca civilization built Machu Picchu.'
+    },
+    {
+      match: ['what process do plants use to convert sunlight into chemical energy', 'how do plants convert sunlight into energy'],
+      question: 'What process do plants use to convert sunlight into chemical energy?',
+      answer: 'Photosynthesis is the process plants use to convert sunlight into chemical energy.'
+    },
+    {
+      match: ['which galaxy contains our solar system', 'what galaxy is our solar system in', 'what galaxy do we live in'],
+      question: 'Which galaxy contains our Solar System?',
+      answer: 'The Milky Way galaxy contains our Solar System.'
+    },
+    {
+      match: ['what is the largest internal organ in the human body', 'largest internal organ in the human body'],
+      question: 'What is the largest internal organ in the human body?',
+      answer: 'The liver is the largest internal organ in the human body.'
+    },
+    {
+      match: ['which number is neither prime nor composite', 'what number is neither prime nor composite'],
+      question: 'Which number is neither prime nor composite?',
+      answer: 'The number 1 is neither prime nor composite.'
+    },
+    {
+      match: ['what is the only mammal capable of true sustained flight', 'only mammal that can fly'],
+      question: 'What is the only mammal capable of true sustained flight?',
+      answer: 'The bat is the only mammal capable of true sustained flight.'
+    },
+    {
+      match: ['what is the smallest unit of an element that retains its properties', 'smallest unit of an element'],
+      question: 'What is the smallest unit of an element that retains its properties?',
+      answer: 'An atom is the smallest unit of an element that retains its properties.'
+    },
+    {
+      match: ['what is the name of the era known as the age of dinosaurs', 'what era is known as the age of dinosaurs'],
+      question: 'What is the name of the era known as the "Age of Dinosaurs"?',
+      answer: 'The Mesozoic Era is known as the "Age of Dinosaurs".'
+    },
+    {
+      match: ['which part of the brain controls balance and coordination', 'what part of the brain controls balance and coordination'],
+      question: 'Which part of the brain controls balance and coordination?',
+      answer: 'The cerebellum controls balance and coordination.'
+    },
+    {
+      match: ['can a fish get thirsty', 'can fish get thirsty'],
+      question: 'Can a fish get thirsty?',
+      answer: "Scientists generally think fish don't experience thirst like humans do because they absorb water through their bodies and regulate it in different ways."
+    },
+    {
+      match: ["why don't penguins feet freeze", 'why dont penguins feet freeze', "why don't penguins' feet freeze"],
+      question: "Why don't penguins' feet freeze?",
+      answer: 'Their feet have special blood circulation that helps reduce heat loss.'
+    },
+    {
+      match: ['can a cloud weigh more than an elephant', 'can a cloud weigh more than an elephant'],
+      question: 'Can a cloud weigh more than an elephant?',
+      answer: 'Yes! A large cloud can contain hundreds of thousands of kilograms of water.'
+    },
+    {
+      match: ['do bananas glow under ultraviolet light', 'do bananas glow under uv light'],
+      question: 'Do bananas glow under ultraviolet light?',
+      answer: 'Yes! Ripe banana peels can glow blue under ultraviolet light.'
+    },
+    {
+      match: ['can astronauts cry in space'],
+      question: 'Can astronauts cry in space?',
+      answer: "Yes, but the tears don't fall. They collect around the eyes because there is no normal gravity-driven drainage."
+    },
+    {
+      match: ["why don't we see baby pigeons", 'why dont we see baby pigeons'],
+      question: "Why don't we see baby pigeons?",
+      answer: 'Baby pigeons usually stay hidden in nests until they are almost fully grown.'
+    },
+    {
+      match: ['can a snail sleep for years'],
+      question: 'Can a snail sleep for years?',
+      answer: 'Some snails can enter very long periods of dormancy when conditions are unfavorable.'
+    },
+    {
+      match: ['do cows have best friends'],
+      question: 'Do cows have best friends?',
+      answer: 'Cows can form strong social preferences and may spend more time with certain individuals.'
+    },
+    {
+      match: ['can a tomato be a fruit', 'is a tomato a fruit'],
+      question: 'Can a tomato be a fruit?',
+      answer: "Yes! Botanically, tomatoes are fruits because they develop from a flower's ovary."
+    },
+    {
+      match: ['why does popcorn pop'],
+      question: 'Why does popcorn pop?',
+      answer: 'Water inside the kernel turns into steam, building pressure until the outer shell bursts.'
+    },
+    {
+      match: ['can sharks blink', 'do sharks blink'],
+      question: 'Can sharks blink?',
+      answer: 'Some sharks have a protective membrane over their eyes, while others roll their eyes backward for protection.'
+    },
+    {
+      match: ['do octopuses have three hearts', 'how many hearts do octopuses have'],
+      question: 'Do octopuses have three hearts?',
+      answer: 'Yes! Octopuses have three hearts.'
+    },
+    {
+      match: ['can a chicken remember your face', 'can chickens remember faces'],
+      question: 'Can a chicken remember your face?',
+      answer: 'Chickens can recognize and remember individual people.'
+    },
+    {
+      match: ['why do cats sometimes stare at nothing', 'why do cats stare at nothing'],
+      question: 'Why do cats sometimes stare at nothing?',
+      answer: "Cats have very sensitive senses, so they may notice tiny sounds or movements that humans don't detect."
+    },
+    {
+      match: ['can trees communicate with each other', 'do trees communicate with each other'],
+      question: 'Can trees communicate with each other?',
+      answer: 'Trees can exchange chemical signals and interact through underground fungal networks.'
+    },
+    {
+      match: ['why do we get brain freeze'],
+      question: 'Why do we get brain freeze?',
+      answer: 'Eating something very cold can rapidly cool tissues in the roof of your mouth and trigger pain signals.'
+    },
+    {
+      match: ['can a spider get stuck in its own web', 'do spiders get stuck in their own webs'],
+      question: 'Can a spider get stuck in its own web?',
+      answer: 'Some spiders avoid getting stuck because parts of their webs are less sticky, and they move carefully.'
+    },
+    {
+      match: ['why are flamingos pink'],
+      question: 'Why are flamingos pink?',
+      answer: 'Their feathers get their pink color from pigments called carotenoids in their food.'
+    },
+    {
+      match: ['can turtles breathe through their butts', 'do turtles breathe through their butts'],
+      question: 'Can turtles breathe through their butts?',
+      answer: 'Some aquatic turtles can absorb oxygen through specialized tissues near their rear end.'
+    },
+    {
+      match: ['why does your stomach not digest itself', 'why doesnt your stomach digest itself', "why doesn't your stomach digest itself"],
+      question: 'Why does your stomach not digest itself?',
+      answer: 'The stomach protects itself with a mucus barrier and other defenses.'
+    },
+    {
+      match: ['what color is black'],
+      question: 'What color is black?',
+      answer: 'Black is the absence of visible light.'
+    },
+    {
+      match: ['what color is a mirror'],
+      question: 'What color is a mirror?',
+      answer: 'A mirror is usually slightly green because of the glass and how it reflects light.'
+    },
+    {
+      match: ['is water actually wet', 'is water wet'],
+      question: 'Is water actually wet?',
+      answer: '"Wet" usually describes a surface covered or saturated with a liquid, so water makes other things wet rather than being wet itself.'
+    },
+    {
+      match: ['why is a hot dog called a hot dog'],
+      question: 'Why is a hot dog called a hot dog?',
+      answer: 'The name became popular because the sausage resembled a dachshund, or "little dog," in a bun.'
+    },
+    {
+      match: ['what color is a shadow'],
+      question: 'What color is a shadow?',
+      answer: 'Usually dark or gray, but its color can change depending on the light around it.'
+    },
+    {
+      match: ['why is the sky blue but space is black', 'why is space black but the sky is blue'],
+      question: 'Why is the sky blue but space is black?',
+      answer: "Earth's atmosphere scatters blue sunlight, while space has almost no atmosphere to scatter the light."
+    },
+    {
+      match: ['if tomatoes are fruits is ketchup a smoothie', 'is ketchup a smoothie'],
+      question: 'If tomatoes are fruits, is ketchup a smoothie?',
+      answer: 'Botanically, ketchup contains fruit, but it is not considered a smoothie.'
+    },
+    {
+      match: ['why is a building called a building if it is already built', 'why is a building called a building'],
+      question: 'Why is a building called a building if it is already built?',
+      answer: '"Building" can be a noun meaning a structure, even though the word originally comes from the act of building.'
+    },
+    {
+      match: ['why do we press harder on a remote when the batteries are dying', 'why do we press remote buttons harder when batteries die'],
+      question: 'Why do we press harder on a remote when the batteries are dying?',
+      answer: "We don't actually make the batteries stronger by pressing harder, but people often do it out of habit."
+    },
+    {
+      match: ['if you drop soap on the floor is the floor clean or is the soap dirty'],
+      question: 'If you drop soap on the floor, is the floor clean or is the soap dirty?',
+      answer: 'Neither has a scientifically fixed answer—it depends on what was on the floor and the soap.'
+    },
+    {
+      match: ['why do we call it a pair of pants when there is only one', 'why is it called a pair of pants'],
+      question: 'Why do we call it a pair of pants when there is only one?',
+      answer: '"Pants" comes from older clothing terms and refers to a garment with two leg sections.'
+    },
+    {
+      match: ['can you sneeze with your eyes open'],
+      question: 'Can you sneeze with your eyes open?',
+      answer: 'It is possible, although most people naturally close their eyes when sneezing.'
+    },
+    {
+      match: ['why does your voice sound different in a recording', 'why does my voice sound different recorded'],
+      question: 'Why does your voice sound different in a recording?',
+      answer: 'You normally hear your voice through both air and vibrations through your skull, while a recording mainly captures sound traveling through the air.'
+    },
+    {
+      match: ['if you clean a vacuum cleaner does that make you a vacuum cleaner'],
+      question: 'If you clean a vacuum cleaner, does that make you a vacuum cleaner?',
+      answer: "Nope. You're just cleaning a vacuum cleaner. 😭"
+    },
+    {
+      match: ['what came first the chicken or the egg', 'chicken or the egg'],
+      question: 'What came first, the chicken or the egg?',
+      answer: 'Eggs existed long before chickens, so an egg came first.'
+    },
+    {
+      match: ['what time is it in japan'],
+      question: 'What time is it in Japan?',
+      answer: 'Japan Standard Time is UTC+9.'
+    },
+    {
+      match: ['why is the sky blue'],
+      question: 'Why is the sky blue?',
+      answer: "Earth's atmosphere scatters blue light from the Sun more than other visible colors."
+    },
+    {
+      match: ['why do cats purr'],
+      question: 'Why do cats purr?',
+      answer: 'Cats often purr when they are relaxed, but they can also purr when stressed, frightened, or seeking comfort.'
+    },
+    {
+      match: ['how many weeks are in a year'],
+      question: 'How many weeks are in a year?',
+      answer: 'A normal year has 52 weeks and 1 day.'
+    },
+    {
+      match: ['why do we dream'],
+      question: 'Why do we dream?',
+      answer: 'Scientists are still studying dreams, but they may be connected to memory, emotions, and brain activity during sleep.'
+    },
+    {
+      match: ['what is the biggest animal in the world', 'biggest animal in the world'],
+      question: 'What is the biggest animal in the world?',
+      answer: 'The blue whale.'
+    },
+    {
+      match: ['why do onions make you cry'],
+      question: 'Why do onions make you cry?',
+      answer: 'Cutting onions releases chemicals that irritate your eyes, causing tears.'
+    },
+    {
+      match: ['why does ice float'],
+      question: 'Why does ice float?',
+      answer: 'Ice is less dense than liquid water, so it floats.'
+    },
+    {
+      match: ['how fast can a cheetah run'],
+      question: 'How fast can a cheetah run?',
+      answer: 'A cheetah can reach around 100 km/h in short bursts.'
+    },
+    {
+      match: ['what is the smallest country in the world', 'smallest country in the world'],
+      question: 'What is the smallest country in the world?',
+      answer: 'Vatican City.'
+    },
+    {
+      match: ['why do we get goosebumps'],
+      question: 'Why do we get goosebumps?',
+      answer: 'Tiny muscles around hair follicles contract, causing the hairs and surrounding skin to rise.'
+    },
+    {
+      match: ['why do cats hate water'],
+      question: 'Why do cats hate water?',
+      answer: 'Not all cats hate water, but some dislike it because wet fur can feel uncomfortable and make movement harder.'
+    },
+    {
+      match: ['how deep is the ocean'],
+      question: 'How deep is the ocean?',
+      answer: 'The average ocean depth is about 3.7 km.'
+    },
+    {
+      match: ['how do airplanes fly'],
+      question: 'How do airplanes fly?',
+      answer: 'Their wings create lift as air moves around them, allowing the plane to stay in the air.'
+    },
+    {
+      match: ['how many teeth do adults have'],
+      question: 'How many teeth do adults have?',
+      answer: 'Most adults have 32 permanent teeth.'
+    },
+    {
+      match: ['why do we have eyebrows'],
+      question: 'Why do we have eyebrows?',
+      answer: 'They help protect the eyes from sweat, rain, and other moisture.'
+    },
+    {
+      match: ['how far is the moon from earth', 'how far away is the moon'],
+      question: 'How far is the Moon from Earth?',
+      answer: 'The Moon is about 384,400 km from Earth on average.'
+    },
+    {
+      match: ['why does your stomach growl', 'why does my stomach growl'],
+      question: 'Why does your stomach growl?',
+      answer: 'Moving gas and fluids through your digestive system can make rumbling sounds.'
+    },
+    {
+      match: ['can fish drown'],
+      question: 'Can fish drown?',
+      answer: "Fish can die from a lack of oxygen, but they don't breathe air the way humans do."
+    },
+    {
+      match: ['can birds fly backwards', 'can birds fly backward'],
+      question: 'Can birds fly backwards?',
+      answer: 'Most birds cannot, but hummingbirds can fly backwards.'
+    },
+    {
+      match: ["why don't we fall off earth", 'why dont we fall off earth'],
+      question: "Why don't we fall off Earth?",
+      answer: "Earth's gravity pulls everything toward its center."
+    },
+    {
+      match: ['can you sneeze in your sleep'],
+      question: 'Can you sneeze in your sleep?',
+      answer: 'It is very uncommon because the brain suppresses many reflexes during sleep.'
+    },
+    {
+      match: ['why is pizza round'],
+      question: 'Why is pizza round?',
+      answer: 'A round shape is easy to stretch, cook evenly, and divide into slices.'
+    },
+    {
+      match: ['can fish blink', 'do fish blink'],
+      question: 'Can fish blink?',
+      answer: "Most fish cannot blink because they don't have eyelids like humans do."
+    },
+    {
+      match: ['why are bananas curved'],
+      question: 'Why are bananas curved?',
+      answer: 'Bananas grow toward sunlight, causing them to curve upward as they develop.'
+    },
+    {
+      match: ['does a straw have one hole or two', 'how many holes does a straw have'],
+      question: 'Does a straw have one hole or two?',
+      answer: 'It depends on how you define a hole, but mathematically a straw can be considered to have one continuous opening.'
+    },
+    {
+      match: ['why is the ocean salty'],
+      question: 'Why is the ocean salty?',
+      answer: 'Minerals and salts from rocks are carried into the ocean by rivers and other processes.'
+    },
+    {
+      match: ['why do dogs tilt their heads'],
+      question: 'Why do dogs tilt their heads?',
+      answer: 'Dogs may tilt their heads to better hear sounds or understand what they are seeing and hearing.'
+    },
+    {
+      match: ['what happens if you swallow gum'],
+      question: 'What happens if you swallow gum?',
+      answer: "Your body doesn't digest most chewing gum, so it usually passes through the digestive system."
+    },
+    {
+      match: ['how many minutes are in a year'],
+      question: 'How many minutes are in a year?',
+      answer: 'A normal year has 525,600 minutes.'
+    },
+    {
+      match: ['why do rainbows form', 'how do rainbows form'],
+      question: 'Why do rainbows form?',
+      answer: 'Rainbows form when sunlight is refracted, reflected, and dispersed by water droplets.'
+    },
+    {
+      match: ['how does wifi work', 'how does wi-fi work'],
+      question: 'How does Wi-Fi work?',
+      answer: 'Wi-Fi uses radio waves to send data between devices and a wireless router.'
+    },
+    {
+      match: ['why is my cat staring at the wall'],
+      question: 'Why is my cat staring at the wall? 🐱',
+      answer: "Your cat may have noticed a tiny sound, movement, or something you can't see. 👀✨"
+    },
+    {
+      match: ['can i eat cereal with a fork'],
+      question: 'Can I eat cereal with a fork? 🥣🍴',
+      answer: 'Technically yes... but Whimsy recommends a spoon. 😭💗'
+    },
+    {
+      match: ['why do i forget why i walked into a room'],
+      question: 'Why do I forget why I walked into a room? 🚪',
+      answer: 'Your brain may have briefly switched tasks and forgotten the original mission. 🧠✨'
+    },
+    {
+      match: ['why does my dog follow me to the bathroom'],
+      question: 'Why does my dog follow me to the bathroom? 🐶🚪',
+      answer: "Your dog probably just thinks you're going somewhere important and doesn't want to miss out. 😭🐾"
+    },
+    {
+      match: ['can i teach my cat to say hello'],
+      question: 'Can I teach my cat to say hello? 🐱👋',
+      answer: 'Not in human words, but your cat can learn sounds, signals, and routines! 🎀🐾'
+    },
+    {
+      match: ['why does my brain play embarrassing memories at 3 am', 'why does my brain play embarrassing memories at 3am'],
+      question: 'Why does my brain play embarrassing memories at 3 AM? 🌙🧠',
+      answer: "Your brain sometimes randomly brings up old memories when you're trying to sleep. 😭💭"
+    },
+    {
+      match: ['can penguins have knees', 'do penguins have knees'],
+      question: 'Can penguins have knees? 🐧🦵',
+      answer: "YES! Penguins have knees—they're just hidden inside their bodies. 😭🐧"
+    },
+    {
+      match: ['why do socks disappear in the washing machine'],
+      question: 'Why do socks disappear in the washing machine? 🧦🌀',
+      answer: 'Scientists blame washing machines... but we all know the Sock Goblin is responsible. 👹🧦✨'
+    },
+    {
+      match: ['can my pet understand when i apologize'],
+      question: 'Can my pet understand when I apologize? 🐶💗',
+      answer: "Pets can recognize your voice and body language, so they may notice when you're being gentle and comforting. 🥹🐾"
+    },
+    {
+      match: ["why does my phone feel heavier when i'm carrying it for someone else", 'why does my phone feel heavier when im carrying it for someone else'],
+      question: "Why does my phone feel heavier when I'm carrying it for someone else? 📱😭",
+      answer: "It probably isn't heavier—you've just become extremely aware of it. 😂✨"
+    },
+    {
+      match: ['can i become a morning person overnight'],
+      question: 'Can I become a morning person overnight? 🌞',
+      answer: 'Sadly, your brain would like several business days. 😭☕💤'
+    },
+    {
+      match: ['why do i open the fridge and forget what i wanted'],
+      question: 'Why do I open the fridge and forget what I wanted? 🧊🚪',
+      answer: 'Your brain may have lost track of the goal when your attention changed. 😭'
+    },
+    {
+      match: ['do birds ever get tired of flying', 'do birds get tired of flying'],
+      question: 'Do birds ever get tired of flying? 🐦☁️',
+      answer: 'Yep! Birds rest, sleep, and use different ways of moving around to save energy. 🥹🌤️'
+    },
+    {
+      match: ['why does my cat ignore me when i call its name'],
+      question: 'Why does my cat ignore me when I call its name? 🐱📢',
+      answer: 'Your cat probably heard you. Whether it chooses to respond is another question. 😭🎀'
+    },
+    {
+      match: ['can i name a cloud'],
+      question: 'Can I name a cloud? ☁️',
+      answer: 'Absolutely. This one is now officially named Fluffy. ☁️🎀✨'
+    },
+    {
+      match: ['why do i suddenly remember something from 7 years ago', 'why do i suddenly remember something from years ago'],
+      question: 'Why do I suddenly remember something from 7 years ago? 🧠💭',
+      answer: 'Random memories can pop up when something reminds your brain of them. ✨'
+    },
+    {
+      match: ['can a turtle run', 'can turtles run'],
+      question: 'Can a turtle run? 🐢💨',
+      answer: 'Turtles can move surprisingly quickly when they really want to! 😭🐢'
+    },
+    {
+      match: ['why do i look for my phone while holding my phone'],
+      question: 'Why do I look for my phone while holding my phone? 📱👀',
+      answer: 'Congratulations. Your brain has entered silly mode. 😂🧠✨'
+    },
+    {
+      match: ['can i teach my goldfish my name'],
+      question: 'Can I teach my goldfish my name? 🐠🎀',
+      answer: 'Goldfish can learn and remember certain things, but introducing yourself is still worth a try. 😭💗'
+    },
+    {
+      match: ["why does my alarm sound louder when i'm sleeping", 'why does my alarm sound louder when im sleeping'],
+      question: 'Why does my alarm sound louder when I\'m sleeping? ⏰😭',
+      answer: 'Because your sleepy brain considers every alarm an emergency. 🚨💀'
+    },
+    {
+      match: ['what happens if i stare at a banana for 10 minutes', 'what happens if i stare at a banana for ten minutes'],
+      question: 'What happens if I stare at a banana for 10 minutes? 🍌👁️',
+      answer: 'Probably nothing... but the banana may begin to question your intentions. 🍌😭'
+    },
+    {
+      match: ['can clouds fall', 'do clouds fall'],
+      question: 'Can clouds fall? ☁️⬇️',
+      answer: "Clouds are made of tiny water droplets or ice crystals floating in the air, so they don't simply fall like a rock. ☁️✨"
+    },
+    {
+      match: ['why do i suddenly become a philosopher in the shower'],
+      question: 'Why do I suddenly become a philosopher in the shower? 🚿🧠',
+      answer: 'Showers are quiet, relaxing places where your brain has plenty of room for random thoughts. 😭✨'
+    },
+    {
+      match: ['is my cat secretly judging me'],
+      question: 'Is my cat secretly judging me? 🐱👀',
+      answer: 'We cannot confirm this... but the evidence is concerning. 😭🎀'
+    },
+    {
+      match: ['how many days are in 2026', 'how many days in 2026'],
+      question: 'How many days are in 2026? 📅',
+      answer: '2026 has 365 days! ✨'
+    },
+    {
+      match: ['847 × 23', '847×23', '847x23', 'what is 847 × 23', 'what is 847x23'],
+      question: 'What is 847 × 23? 🧮',
+      answer: '19,481 🎀✨'
+    },
+    {
+      match: ['what is the capital of australia', 'capital of australia'],
+      question: 'What is the capital of Australia? 🌏',
+      answer: 'Canberra! 🇦🇺✨'
+    },
+    {
+      match: ['why do cats knead blankets'],
+      question: 'Why do cats knead blankets? 🐱',
+      answer: 'It is a comforting behavior that cats often learn as kittens. 🐾💗'
+    },
+    {
+      match: ['what does onomatopoeia mean', "what does 'onomatopoeia' mean"],
+      question: 'What does "onomatopoeia" mean? 📖',
+      answer: 'A word that imitates a sound, like "buzz" or "hiss"! 🐝💨'
+    },
+    {
+      match: ['why is my wifi slow', 'why is my wi-fi slow'],
+      question: 'Why is my Wi-Fi slow? 📶',
+      answer: 'It could be caused by distance from the router, lots of connected devices, or network congestion. 📶😭'
+    },
+    {
+      match: ['why do dogs wag their tails', 'why do dogs wag tails'],
+      question: 'Why do dogs wag their tails? 🐶',
+      answer: 'Tail wagging can communicate excitement, happiness, nervousness, or other feelings. 🐾💕'
+    },
+    {
+      match: ['how many seconds are in a day', 'how many seconds in a day'],
+      question: 'How many seconds are in a day? ⏰',
+      answer: '86,400 seconds! 😭⏱️'
+    },
+    {
+      match: ['999 + 888', '999+888', 'what is 999+888', 'what is 999 + 888'],
+      question: 'What is 999 + 888? ➕',
+      answer: '1,887! 🎀🧮'
+    },
+    {
+      match: ['can penguins fly', 'do penguins fly'],
+      question: 'Can penguins fly? 🐧',
+      answer: "Nope! Penguins can't fly through the air, but they're excellent swimmers. 🐧🌊"
+    },
+    {
+      match: ['can fish sneeze', 'do fish sneeze'],
+      question: 'Can fish sneeze? 🐟',
+      answer: "Fish don't sneeze like humans because they don't have lungs and noses like ours. 🫧🐟"
+    },
+    {
+      match: ['why is my cat ignoring me'],
+      question: 'Why is my cat ignoring me? 😭🐱',
+      answer: 'Your cat may have heard you perfectly well and simply decided that you are not today\'s priority. 😭🎀'
+    },
+    {
+      match: ['can a chicken swim', 'can chickens swim'],
+      question: 'Can a chicken swim? 🐔',
+      answer: "Chickens can paddle and may float for a short time, but swimming isn't their natural specialty. 🐔🌊"
+    },
+    {
+      match: ['is cereal soup'],
+      question: 'Is cereal soup? 🥣',
+      answer: "That's a very serious debate... Whimsy refuses to take sides. 😭🥣"
+    },
+    {
+      match: ['can a potato be a pet'],
+      question: 'Can a potato be a pet? 🥔',
+      answer: 'It can be your emotional-support potato. 🥔💗'
+    },
+    {
+      match: ['why does my brain forget everything'],
+      question: 'Why does my brain forget everything? 🧠',
+      answer: "Forgetting can happen when information isn't stored strongly or when your attention is somewhere else. 🧠✨"
+    },
+    {
+      match: ['can turtles jump', 'can a turtle jump'],
+      question: 'Can turtles jump? 🐢',
+      answer: "Some turtles can make small jumps or hops, but they're definitely not Olympic jumpers. 😭🐢"
+    },
+    {
+      match: ['what happens if i name my plant bob'],
+      question: 'What happens if I name my plant Bob? 🌱',
+      answer: 'Bob becomes a respected member of the family. 🌱🎩✨'
+    },
+    {
+      match: ['why does my dog stare at me'],
+      question: 'Why does my dog stare at me? 🐶👀',
+      answer: "Your dog may be waiting for food, attention, or simply wondering what you're doing. 🐶💗"
+    },
+    {
+      match: ['can a penguin live in my bedroom'],
+      question: 'Can a penguin live in my bedroom? 🐧',
+      answer: 'Probably not a good idea. Penguins need the right temperature, food, water, and environment. 🐧❄️'
+    },
+    {
+      match: ['do fish know they are wet'],
+      question: 'Do fish know they are wet? 🐟💧',
+      answer: 'We can\'t know exactly what a fish experiences, but fish live surrounded by water rather than experiencing "wetness" like humans do. 🐟🫧'
+    },
+    {
+      match: ['can i teach a banana to dance'],
+      question: 'Can I teach a banana to dance? 🍌💃',
+      answer: 'You can try... but Whimsy makes no promises. 🍌😭✨'
+    },
+    {
+      match: ['why does my fridge make weird noises'],
+      question: 'Why does my fridge make weird noises? 🧊',
+      answer: 'Refrigerators can make clicking, humming, buzzing, or popping sounds as their parts operate and temperatures change. 🧊✨'
+    },
+    {
+      match: ['what is the square root of 144', 'square root of 144', 'sqrt of 144', 'sqrt 144'],
+      question: 'What is the square root of 144? 🧮',
+      answer: '12! ✨'
+    },
+    {
+      match: ['why does the earth have seasons', "why does earth have seasons"],
+      question: 'Why does the Earth have seasons? 🌎',
+      answer: "Earth's tilted axis causes different parts of the planet to receive different amounts of sunlight during the year. ☀️🌸❄️"
+    },
+    {
+      match: ['what is the difference between weather and climate', 'difference between weather and climate'],
+      question: 'What is the difference between weather and climate? 🌦️',
+      answer: 'Weather is what the atmosphere is like over a short time; climate describes patterns over much longer periods. 🌍✨'
+    },
+    {
+      match: ['how does gravity work'],
+      question: 'How does gravity work? 🌎',
+      answer: "Gravity is the attraction between objects with mass. Earth's gravity pulls objects toward its center. 🍎✨"
+    },
+    {
+      match: ['why is space dark'],
+      question: 'Why is space dark? 🌌',
+      answer: 'Space has very little matter to scatter light, so areas away from bright objects appear dark. 🌌✨'
+    },
+    {
+      match: ['what is the largest mammal', 'largest mammal'],
+      question: 'What is the largest mammal? 🐋',
+      answer: 'The blue whale! 🐋💙'
+    },
+    {
+      match: ['how does a rainbow form'],
+      question: 'How does a rainbow form? 🌈',
+      answer: 'Sunlight enters water droplets, where it is refracted, reflected, and separated into different colors. 🌈✨'
+    },
+    {
+      match: ['what causes an eclipse'],
+      question: 'What causes an eclipse? 🌑',
+      answer: 'An eclipse happens when the Sun, Earth, and Moon line up so that one body blocks some of the light from another. 🌞🌎🌙'
+    },
+    {
+      match: ['how to make pancakes', 'how do you make pancakes'],
+      question: 'How to make pancakes? 🥞',
+      answer: 'Mix flour, milk, eggs, and a little baking powder, then cook the batter on a heated pan. 🥞💗'
+    },
+    {
+      match: ['weather tomorrow', 'what is the weather tomorrow'],
+      question: 'Weather tomorrow? ☁️',
+      answer: 'Whimsy would need your location to give you the correct forecast! 🌦️📍'
+    },
+    {
+      match: ['how many days until friday'],
+      question: 'How many days until Friday? 📅',
+      answer: 'That depends on what day you search it! 😭✨'
+    },
+    {
+      match: ['convert 5 miles to kilometers', 'convert 5 miles to km', '5 miles to km', '5 miles to kilometers'],
+      question: 'Convert 5 miles to kilometers. 🛣️',
+      answer: 'About 8.05 kilometers! ✨'
+    },
+    {
+      match: ['what is 25% of 800', '25% of 800'],
+      question: 'What is 25% of 800? 🧮',
+      answer: '200! 🎀'
+    },
+    {
+      match: ["what is today's date", 'what is todays date'],
+      question: "What is today's date? 📅",
+      answer: 'September 19, 2026! ✨'
+    },
+    {
+      match: ['how do you spell necessary'],
+      question: 'How do you spell necessary? ✏️',
+      answer: 'N-E-C-E-S-S-A-R-Y 🎀📚'
+    },
+    {
+      match: ['what does lol mean'],
+      question: 'What does "LOL" mean? 😂',
+      answer: '"Laughing Out Loud"! 😭😂'
+    },
+    {
+      match: ['how many minutes are in 3 hours', 'how many minutes in 3 hours'],
+      question: 'How many minutes are in 3 hours? ⏰',
+      answer: '180 minutes! ✨'
+    },
+    {
+      match: ['how many months are in a year', 'how many months in a year'],
+      question: 'How many months are in a year? 📅',
+      answer: '12 months! 🌸'
+    },
+    {
+      match: ['15 × 15', '15×15', '15x15', 'what is 15 × 15', 'what is 15x15'],
+      question: 'What is 15 × 15? 🧮',
+      answer: '225! ✨'
+    },
+    {
+      match: ['how do you make hot chocolate'],
+      question: 'How do you make hot chocolate? ☕',
+      answer: 'Mix warm milk with cocoa powder and sugar, then add marshmallows if you want extra cuteness. ☁️🍫💗'
+    },
+    {
+      match: ['what is the fastest land animal', 'fastest land animal'],
+      question: 'What is the fastest land animal? 🐆',
+      answer: 'The cheetah! 🐆💨✨'
+    },
+    {
+      match: ['why do cats have whiskers'],
+      question: 'Why do cats have whiskers? 🐱',
+      answer: 'Whiskers help cats sense nearby objects and changes in their surroundings. 🐾✨'
+    },
+    {
+      match: ['can frogs breathe underwater', 'do frogs breathe underwater'],
+      question: 'Can frogs breathe underwater? 🐸',
+      answer: 'Frogs can absorb oxygen through their skin while underwater, but they also need to breathe air. 💧🐸'
+    },
+    {
+      match: ['why is the moon sometimes orange', 'why is the moon orange'],
+      question: 'Why is the Moon sometimes orange? 🌕🧡',
+      answer: "When the Moon is low in the sky, Earth's atmosphere can make it appear orange or reddish. 🌙✨"
+    },
+    {
+      match: ['can you hiccup while sleeping', 'can you get hiccups while sleeping'],
+      question: 'Can you hiccup while sleeping? 😴',
+      answer: "Hiccups are much less common during sleep and usually stop once you're deeply asleep. 💤"
+    },
+    {
+      match: ['why do bananas turn brown'],
+      question: 'Why do bananas turn brown? 🍌',
+      answer: 'Enzymes in the banana react with oxygen, causing the peel and fruit to darken. 🍌🤎'
+    },
+    {
+      match: ['can spiders swim', 'do spiders swim'],
+      question: 'Can spiders swim? 🕷️🌊',
+      answer: 'Some spiders can move across water and even stay afloat using surface tension. 🕷️✨'
+    },
+    {
+      match: ['why do we yawn'],
+      question: 'Why do we yawn? 🥱',
+      answer: "Scientists aren't completely sure, but yawning is connected to changes in alertness and brain activity. 🧠💤"
+    },
+    {
+      match: ['can a cloud touch the ground', 'can clouds touch the ground'],
+      question: 'Can a cloud touch the ground? ☁️',
+      answer: 'Yes! When a cloud reaches the ground, we call it fog. 🌫️✨'
+    },
+    {
+      match: ['why are flamingos standing on one leg', 'why do flamingos stand on one leg'],
+      question: 'Why are flamingos standing on one leg? 🦩',
+      answer: 'Standing on one leg can help flamingos conserve body heat. 🦩💗'
+    },
+    {
+      match: ['do butterflies have bones', 'can butterflies have bones'],
+      question: 'Do butterflies have bones? 🦋',
+      answer: 'No! Butterflies have an exoskeleton instead of internal bones. 🦋✨'
+    },
+    {
+      match: ['why do we get hiccups'],
+      question: 'Why do we get hiccups? 😭',
+      answer: 'Hiccups happen when the diaphragm suddenly contracts involuntarily. 🫁✨'
+    },
+    {
+      match: ['can cats recognize their names', 'do cats recognize their names'],
+      question: 'Can cats recognize their names? 🐱',
+      answer: 'Yes, cats can learn to recognize the sound of their names. Whether they respond is another story. 😭🎀'
+    },
+    {
+      match: ['why is milk white'],
+      question: 'Why is milk white? 🥛',
+      answer: 'Tiny particles in milk scatter light, making it appear white. 🥛✨'
+    },
+    {
+      match: ['can a snail live without its shell', 'can snails live without their shell'],
+      question: 'Can a snail live without its shell? 🐌',
+      answer: "No. A snail's shell is part of its body and protects its internal organs. 🐌💗"
+    },
+    {
+      match: ['why do stars twinkle'],
+      question: 'Why do stars twinkle? ⭐',
+      answer: "Earth's atmosphere bends and distorts starlight, making stars appear to twinkle. ✨⭐"
+    },
+    {
+      match: ['can dolphins sleep', 'do dolphins sleep'],
+      question: 'Can dolphins sleep? 🐬',
+      answer: 'Yes! Dolphins rest one half of their brain at a time so they can continue breathing. 🐬💤'
+    },
+    {
+      match: ['why are carrots orange'],
+      question: 'Why are carrots orange? 🥕',
+      answer: 'Orange carrots get their color mainly from pigments called beta-carotene. 🥕🧡'
+    },
+    {
+      match: ['can trees talk', 'do trees talk'],
+      question: 'Can trees talk? 🌳',
+      answer: "Trees don't talk with words, but they can communicate through chemical signals and interactions with fungi. 🌳🍄✨"
+    },
+    {
+      match: ['why does garlic smell so strong'],
+      question: 'Why does garlic smell so strong? 🧄',
+      answer: 'Cutting or crushing garlic releases sulfur-containing compounds that create its strong smell. 🧄😭'
+    },
+    {
+      match: ['can a duck fly backwards', 'can ducks fly backwards'],
+      question: 'Can a duck fly backwards? 🦆',
+      answer: 'Most ducks cannot fly backwards because of the shape of their wings. 🦆💨'
+    },
+    {
+      match: ['why does metal feel colder than wood'],
+      question: 'Why does metal feel colder than wood? 🥶',
+      answer: 'Metal conducts heat away from your hand faster than wood does, so it feels colder. 🧊✨'
+    },
+    {
+      match: ['can plants feel pain', 'do plants feel pain'],
+      question: 'Can plants feel pain? 🌱',
+      answer: 'Plants respond to damage and their environment, but there is no evidence that they experience pain like animals do. 🌿💚'
+    },
+    {
+      match: ['why does popcorn smell so good'],
+      question: 'Why does popcorn smell so good? 🍿',
+      answer: 'Heating popcorn creates many aroma compounds that our brains associate with tasty food. 🍿👃✨'
+    },
+    {
+      match: ['can elephants jump', 'do elephants jump'],
+      question: 'Can elephants jump? 🐘',
+      answer: "Elephants can't truly jump because they cannot lift all four feet off the ground at once. 🐘😭"
+    },
+    {
+      match: ['why do we have fingerprints'],
+      question: 'Why do we have fingerprints? 🖐️',
+      answer: 'Fingerprints help improve grip and provide unique patterns on our fingertips. ✨🖐️'
+    },
+    {
+      match: ['can a snake blink', 'do snakes blink'],
+      question: 'Can a snake blink? 🐍',
+      answer: "No! Snakes don't have movable eyelids. Their eyes are covered by a transparent protective scale. 🐍👀"
+    },
+    {
+      match: ['why is the ocean blue'],
+      question: 'Why is the ocean blue? 🌊',
+      answer: 'Water absorbs many colors of light and scatters blue light more strongly. 💙🌊'
+    },
+    {
+      match: ['can ants survive a fall', 'do ants survive a fall'],
+      question: 'Can ants survive a fall? 🐜',
+      answer: 'Many ants can survive falls because their tiny size means they reach a low falling speed. 🐜✨'
+    },
+    {
+      match: ['why do dogs sniff everything'],
+      question: 'Why do dogs sniff everything? 🐶👃',
+      answer: 'Dogs have an extremely powerful sense of smell and use it to learn about their surroundings. 🐾✨'
+    },
+    {
+      match: ['can a jellyfish live forever', 'do jellyfish live forever'],
+      question: 'Can a jellyfish live forever? 🪼',
+      answer: 'One species, the immortal jellyfish, can return to an earlier life stage under certain conditions. 🪼✨'
+    },
+    {
+      match: ['why do lemons taste sour'],
+      question: 'Why do lemons taste sour? 🍋',
+      answer: 'Lemons contain citric acid, which creates their sour taste. 🍋💛'
+    },
+    {
+      match: ['can owls turn their heads all the way around', 'can owls turn their heads 360 degrees'],
+      question: "Can owls turn their heads all the way around? 🦉",
+      answer: 'No! Owls can rotate their heads about 270 degrees, not a full 360. 🦉✨'
+    },
+    {
+      match: ['why does chocolate melt in your hand'],
+      question: 'Why does chocolate melt in your hand? 🍫',
+      answer: 'Chocolate melts near body temperature, so the warmth of your hand can soften it. 🍫😭'
+    },
+    {
+      match: ['can goldfish remember things', 'do goldfish remember things'],
+      question: 'Can goldfish remember things? 🐠',
+      answer: 'Yes! Goldfish can learn and remember information for much longer than the famous "three-second memory" myth suggests. 🐠✨'
+    },
+    {
+      match: ['why do we have dreams'],
+      question: 'Why do we have dreams? 🌙💭',
+      answer: 'Dreams are linked to brain activity during sleep, but scientists are still studying exactly why we dream. 🌙✨'
+    },
+    {
+      match: ['can a potato grow eyes', 'do potatoes grow eyes'],
+      question: 'Can a potato grow eyes? 🥔👀',
+      answer: 'Yes! The little "eyes" on a potato are buds that can grow into new shoots. 🥔🌱'
+    },
+    {
+      match: ['why does bread rise'],
+      question: 'Why does bread rise? 🍞',
+      answer: 'Yeast produces carbon dioxide gas, which gets trapped in the dough and makes it expand. 🍞✨'
+    },
+    {
+      match: ['can birds recognize humans', 'do birds recognize humans'],
+      question: 'Can birds recognize humans? 🐦',
+      answer: 'Some birds can recognize individual people and remember them. 🐦👀'
+    },
+    {
+      match: ['can a crab walk forward', 'can crabs walk forward'],
+      question: 'Can a crab walk forward? 🦀',
+      answer: 'Yes! Crabs can move forward, but many species are much better at moving sideways. 🦀💨'
+    },
+    {
+      match: ['why do bubbles look rainbow colored', 'why do bubbles look rainbow-colored'],
+      question: 'Why do bubbles look rainbow-colored? 🫧🌈',
+      answer: 'Light reflects off the thin soap film and creates colorful interference patterns. ✨🌈'
+    },
+    {
+      match: ['can a star explode', 'do stars explode'],
+      question: 'Can a star explode? ⭐💥',
+      answer: 'Yes! Some massive stars end their lives in enormous explosions called supernovae. 🌌✨'
+    },
+    {
+      match: ['why do we get sleepy after eating'],
+      question: 'Why do we get sleepy after eating? 😴🍕',
+      answer: "Digestion and changes in hormones and blood sugar can contribute to feeling sleepy, although meals aren't the only factor. 💤"
+    },
+    {
+      match: ['can plants grow without sunlight', 'do plants grow without sunlight'],
+      question: 'Can plants grow without sunlight? 🌱',
+      answer: 'Most plants need light to photosynthesize, although some plants can survive for a while using stored energy. 🌿✨'
+    },
+    {
+      match: ['why does salt make ice melt faster'],
+      question: 'Why does salt make ice melt faster? 🧂🧊',
+      answer: 'Salt lowers the freezing point of water, helping ice melt at temperatures below 0°C. ❄️✨'
+    },
+    {
+      match: ['what is the capital of pakistan', 'capital of pakistan'],
+      question: 'What is the capital of Pakistan?',
+      answer: 'Islamabad 🇵🇰✨'
+    },
+    {
+      match: ['what is the largest country in the world', 'largest country in the world'],
+      question: 'What is the largest country in the world?',
+      answer: 'Russia 🌎'
+    },
+    {
+      match: ['how many oceans are there'],
+      question: 'How many oceans are there?',
+      answer: '5 🌊'
+    },
+    {
+      match: ['what is water made of'],
+      question: 'What is water made of?',
+      answer: 'Hydrogen and oxygen — H₂O 💧'
+    },
+    {
+      match: ['what is gravity'],
+      question: 'What is gravity?',
+      answer: 'Gravity is the force that attracts objects with mass toward one another. 🌎✨'
+    },
+    {
+      match: ['why do we sneeze'],
+      question: 'Why do we sneeze?',
+      answer: 'Sneezing helps clear irritants from the nose. 🤧'
+    },
+    {
+      match: ['what is the largest organ', 'largest organ in the human body'],
+      question: 'What is the largest organ?',
+      answer: 'The skin. 🫧'
+    },
+    {
+      match: ['what organ pumps blood'],
+      question: 'What organ pumps blood?',
+      answer: 'The heart. ❤️'
+    },
+    {
+      match: ['what organ controls the body'],
+      question: 'What organ controls the body?',
+      answer: 'The brain. 🧠'
+    },
+    {
+      match: ['why does your heart beat'],
+      question: 'Why does your heart beat?',
+      answer: 'The heart contracts to pump blood around the body. ❤️'
+    },
+    {
+      match: ['why do we sleep'],
+      question: 'Why do we sleep?',
+      answer: 'Sleep supports many important brain and body functions. 🌙💤'
+    },
+    {
+      match: ['can fish breathe underwater', 'do fish breathe underwater'],
+      question: 'Can fish breathe underwater?',
+      answer: 'Yes! Fish use gills to extract oxygen from water. 🐟'
+    },
+    {
+      match: ['is a cucumber a fruit', 'is cucumber a fruit'],
+      question: 'Is a cucumber a fruit?',
+      answer: 'Botanically, yes! 🥒'
+    },
+    {
+      match: ['why is chocolate brown'],
+      question: 'Why is chocolate brown?',
+      answer: 'Cocoa solids and other ingredients give chocolate its characteristic color. 🍫'
+    },
+    {
+      match: ['why is salt salty'],
+      question: 'Why is salt salty?',
+      answer: 'Salt contains sodium and chloride ions that interact with taste receptors. 🧂'
+    },
+    {
+      match: ['why does spicy food feel hot'],
+      question: 'Why does spicy food feel hot?',
+      answer: 'Capsaicin activates receptors that normally respond to heat and irritation. 🌶️🔥'
+    },
+    {
+      match: ['is a hot dog a sandwich'],
+      question: 'Is a hot dog a sandwich?',
+      answer: 'There is no universally accepted answer. 🌭😭'
+    },
+    {
+      match: ['which planet is closest to the sun', 'closest planet to the sun'],
+      question: 'Which planet is closest to the Sun?',
+      answer: 'Mercury. ☀️'
+    },
+    {
+      match: ['which planet has rings', 'what planet has rings'],
+      question: 'Which planet has rings?',
+      answer: "Several planets have rings, but Saturn's are the most famous. 🪐"
+    },
+    {
+      match: ['can humans breathe in space', 'can you breathe in space'],
+      question: 'Can humans breathe in space?',
+      answer: 'No. Humans need oxygen and pressure to breathe normally. 🚀'
+    },
+    {
+      match: ['what is a black hole'],
+      question: 'What is a black hole?',
+      answer: 'A region of space where gravity is so strong that even light cannot escape. 🕳️✨'
+    },
+    {
+      match: ['what is a galaxy'],
+      question: 'What is a galaxy?',
+      answer: 'A huge collection of stars, gas, dust, and other matter held together by gravity. 🌌'
+    },
+    {
+      match: ['what is 25 × 4', '25 × 4', '25×4', '25x4'],
+      question: 'What is 25 × 4?',
+      answer: '100 🎀'
+    },
+    {
+      match: ['what is 999 + 999', '999 + 999', '999+999'],
+      question: 'What is 999 + 999?',
+      answer: '1,998 ✨'
+    },
+    {
+      match: ['what is 144 ÷ 12', '144 ÷ 12', '144/12'],
+      question: 'What is 144 ÷ 12?',
+      answer: '12 🧮'
+    },
+    {
+      match: ['what is the square root of 81', 'square root of 81', 'sqrt of 81', 'sqrt 81'],
+      question: 'What is the square root of 81?',
+      answer: '9 ✨'
+    },
+    {
+      match: ['what is 15% of 200', '15% of 200'],
+      question: 'What is 15% of 200?',
+      answer: '30 💡'
+    },
+    {
+      match: ['how many seconds are in a minute', 'how many seconds in a minute'],
+      question: 'How many seconds are in a minute?',
+      answer: '60 ⏰'
+    },
+    {
+      match: ['how many minutes are in an hour', 'how many minutes in an hour'],
+      question: 'How many minutes are in an hour?',
+      answer: '60 ⏰'
+    },
+    {
+      match: ['how many hours are in a day', 'how many hours in a day'],
+      question: 'How many hours are in a day?',
+      answer: '24 🌞'
+    },
+    {
+      match: ['how many days are in a normal year', 'how many days are in a year'],
+      question: 'How many days are in a normal year?',
+      answer: '365 📅'
+    },
+    {
+      match: ['how many sides does a hexagon have'],
+      question: 'How many sides does a hexagon have?',
+      answer: '6 🔷'
+    },
+    {
+      match: ['what does wifi do', 'what does wi-fi do'],
+      question: 'What does Wi-Fi do?',
+      answer: 'It allows devices to connect wirelessly to a network. 📶'
+    },
+    {
+      match: ['what does cpu stand for'],
+      question: 'What does CPU stand for?',
+      answer: 'Central Processing Unit. 💻'
+    },
+    {
+      match: ['what does html stand for'],
+      question: 'What does HTML stand for?',
+      answer: 'HyperText Markup Language. 🌐'
+    },
+    {
+      match: ['what does css do'],
+      question: 'What does CSS do?',
+      answer: 'CSS controls the appearance and layout of webpages. 🎨'
+    },
+    {
+      match: ['what does url stand for'],
+      question: 'What does URL stand for?',
+      answer: 'Uniform Resource Locator. 🔗'
+    },
+    {
+      match: ['what does ai stand for'],
+      question: 'What does AI stand for?',
+      answer: 'Artificial Intelligence. 🤖'
+    },
+    {
+      match: ['what is a browser'],
+      question: 'What is a browser?',
+      answer: 'Software used to access and view websites. 🌐'
+    },
+    {
+      match: ['what is a password'],
+      question: 'What is a password?',
+      answer: 'A secret string used to help protect an account or system. 🔐'
+    },
+    {
+      match: ['what is bluetooth'],
+      question: 'What is Bluetooth?',
+      answer: 'A technology for short-range wireless communication between devices. 📱'
+    },
+    {
+      match: ['what is an emoji'],
+      question: 'What is an emoji?',
+      answer: 'A small digital symbol used to express an idea, feeling, or object. 😂🎀'
+    },
+    {
+      match: ['why do socks disappear'],
+      question: 'Why do socks disappear?',
+      answer: 'The Sock Goblin has been notified. 🧦👹'
+    },
+    {
+      match: ['why do cats stare at walls'],
+      question: 'Why do cats stare at walls?',
+      answer: "They may notice tiny sounds or movements that humans don't detect. 🐱👀"
+    },
+    {
+      match: ['can a banana dance'],
+      question: 'Can a banana dance?',
+      answer: 'Only if you give it an excellent playlist. 🍌💃'
+    },
+    {
+      match: ['why do i forget why i entered a room'],
+      question: 'Why do I forget why I entered a room?',
+      answer: 'Your attention may have shifted before you remembered your original goal. 🚪🧠'
+    },
+    {
+      match: ["why does my phone disappear when i'm holding it", 'why does my phone disappear when im holding it'],
+      question: "Why does my phone disappear when I'm holding it?",
+      answer: 'Your brain has activated maximum silly mode. 📱😭'
+    },
+    {
+      match: ['what does omg mean'],
+      question: 'What does "OMG" mean?',
+      answer: 'Oh My God. 😭'
+    },
+    {
+      match: ['what does brb mean'],
+      question: 'What does "brb" mean?',
+      answer: 'Be Right Back. 🏃'
+    },
+    {
+      match: ['what does serendipity mean'],
+      question: 'What does "serendipity" mean?',
+      answer: 'Finding something wonderful by chance. ✨'
+    },
+    {
+      match: ['what is a synonym'],
+      question: 'What is a synonym?',
+      answer: 'A word with the same or similar meaning as another word. 📚'
+    },
+    {
+      match: ['what is an antonym'],
+      question: 'What is an antonym?',
+      answer: 'A word with the opposite meaning. ↔️'
+    },
+    {
+      match: ['what is an adjective'],
+      question: 'What is an adjective?',
+      answer: 'A word that describes a noun. 🌸'
+    },
+    {
+      match: ['what is a verb'],
+      question: 'What is a verb?',
+      answer: 'A word that expresses an action or state. ✏️'
+    },
+    {
+      match: ['what is the longest word in english'],
+      question: 'What is the longest word in English?',
+      answer: 'There isn\'t one single universally agreed "longest word," because it depends on what counts as a word. 🤓✨'
+    },
+    {
+      match: ['how do i impress a guy'],
+      question: 'How do I impress a guy? 🎀',
+      answer: "Be yourself, be kind, and don't try too hard. Confidence is the real rizz. ✨😌"
+    },
+    {
+      match: ['how do i get rizz'],
+      question: 'How do I get rizz? 😭',
+      answer: 'Good conversation + confidence + being respectful = elite rizz. 🫡✨'
+    },
+    {
+      match: ['what do i say if my crush texts hey', 'what do i say if my crush texts "hey"'],
+      question: 'What do I say if my crush texts "hey"? 📱',
+      answer: 'Say "heyyy :)" and let the conversation cook. 🍳😭'
+    },
+    {
+      match: ['how do i know if someone likes me'],
+      question: 'How do I know if someone likes me? 👀',
+      answer: 'They may look for reasons to talk to you, remember little things, or seem especially happy around you. 💗'
+    },
+    {
+      match: ['what does rizz mean'],
+      question: 'What does rizz mean? 🗿',
+      answer: '"Rizz" means charm or the ability to attract someone. ✨'
+    },
+    {
+      match: ['how do i become the main character'],
+      question: 'How do I become the main character? 🎬',
+      answer: "Do things you enjoy, be confident, and stop worrying about being perfect. 🌷✨"
+    },
+    {
+      match: ['how do i glow up'],
+      question: 'How do I glow up? ✨',
+      answer: 'Sleep well, take care of yourself, wear things you like, and build confidence. 💗🌸'
+    },
+    {
+      match: ['how do i stop being awkward'],
+      question: 'How do I stop being awkward? 😭',
+      answer: 'Remember that almost everyone feels awkward sometimes. Just breathe and keep the conversation going. 🫶'
+    },
+    {
+      match: ['what do i text my crush'],
+      question: 'What do I text my crush? 📱',
+      answer: 'Try something simple like "What are you up to?" instead of overthinking it for 47 business days. 😭💀'
+    },
+    {
+      match: ['what does delulu mean'],
+      question: 'What does "delulu" mean? 🧠',
+      answer: "It's slang for \"delusional,\" usually used jokingly for someone being unrealistically hopeful. 😭✨"
+    },
+    {
+      match: ['how do i know if i have rizz'],
+      question: 'How do I know if I have rizz? 🗿',
+      answer: "If people enjoy talking to you and you can make conversations comfortable and fun, that's a pretty good start. 😌✨"
+    },
+    {
+      match: ['how do i make friends'],
+      question: 'How do I make friends? 🫂',
+      answer: 'Start with small conversations, be friendly, and find people who share your interests. 🌸'
+    },
+    {
+      match: ['why did my crush leave me on read'],
+      question: 'Why did my crush leave me on read? 😭',
+      answer: "They could be busy, distracted, or simply unsure what to say. Don't immediately assume the worst. 💗"
+    },
+    {
+      match: ['what does sigma mean'],
+      question: 'What does "sigma" mean? 🗿',
+      answer: 'Online, "sigma" is often slang for someone portrayed as independent or confident, but it\'s also used as a meme. 😭'
+    },
+    {
+      match: ['how do i become funny'],
+      question: 'How do I become funny? 😂',
+      answer: "Notice what makes people laugh, don't force jokes, and learn to laugh at yourself. 🎀"
+    },
+    {
+      match: ['how do i survive school'],
+      question: 'How do I survive school? 📚💀',
+      answer: 'Sleep, do your work, stay organized, drink water, and remember that the school day eventually ends. 😭✌️'
+    },
+    {
+      match: ['how do i look cool'],
+      question: 'How do I look cool? 😎',
+      answer: 'Stop trying to look cool. Being comfortable with yourself is cooler. ✨'
+    },
+    {
+      match: ['what does aura mean'],
+      question: 'What does "aura" mean? ✨',
+      answer: "Internet slang for someone's vibe, presence, or perceived coolness. 😌"
+    },
+    {
+      match: ['how do i get aura points'],
+      question: 'How do I get aura points? 📈',
+      answer: 'Be kind, confident, helpful, and maybe stop walking into doors. 😭🚪'
+    },
+    {
+      match: ['how do i rizz someone up'],
+      question: 'How do I rizz someone up? 🗿',
+      answer: 'Talk normally, listen to them, make them laugh, and respect their boundaries. ✨'
+    },
+    {
+      match: ['what do i do if my crush likes someone else'],
+      question: 'What do I do if my crush likes someone else? 💔',
+      answer: "It's okay to feel disappointed. Give yourself some space and focus on people and activities that make you happy. 🫶🌷"
+    },
+    {
+      match: ['how do i stop overthinking a text'],
+      question: 'How do I stop overthinking a text? 📱😭',
+      answer: 'Send the message, put your phone down, and go do literally anything else. 😭✨'
+    },
+    {
+      match: ['what does npc mean'],
+      question: 'What does "NPC" mean? 🎮',
+      answer: 'NPC means "non-player character," but online it\'s often used as slang for someone acting predictable or repetitive. 😂'
+    },
+    {
+      match: ['how do i become iconic'],
+      question: 'How do I become iconic? 👑',
+      answer: "Have your own personality, enjoy what you love, and don't copy everyone else. ✨🎀"
+    },
+    {
+      match: ['how do i get my crush to notice me'],
+      question: 'How do I get my crush to notice me? 👀',
+      answer: 'Be friendly, talk to them naturally, and let your personality show. No elaborate schemes required. 😭💗'
+    },
+    {
+      match: ['how do i become pretty and beautiful', 'how do i become pretty', 'how do i become beautiful'],
+      question: 'How do I become pretty and beautiful? 🎀✨',
+      answer: "You already are beautiful just the way you are! 💗 You don't have to change yourself to impress or please anyone. Be yourself, take care of yourself, and remember that your worth isn't decided by how you look. 🌷🫶✨"
+    },
+    {
+      match: ['how do i know if i like someone'],
+      question: 'How do I know if I like someone? 🌸',
+      answer: 'You might think about them often, enjoy talking to them, and feel extra happy or nervous around them. 🦋'
+    },
+    {
+      match: ['what should i text my crush'],
+      question: 'What should I text my crush? 💌',
+      answer: 'Keep it simple! Try "Heyy, how are you?" or ask about something you both enjoy. 🌷'
+    },
+    {
+      match: ['what does having a crush mean'],
+      question: 'What does having a crush mean? 🦋',
+      answer: 'A crush is when you feel especially interested or attracted to someone and enjoy thinking or talking about them. 💗'
+    },
+    {
+      match: ['how do i start a conversation with my crush'],
+      question: 'How do I start a conversation with my crush? 💬',
+      answer: 'Start naturally with something simple like "How was your day?" or talk about a shared interest. 🎀'
+    },
+    {
+      match: ['what should i do if my crush says hi'],
+      question: 'What should I do if my crush says hi? 😭💗',
+      answer: "Say hi back and smile! You can also ask them how they're doing. Keep it natural and relaxed. 🌸"
+    },
+    {
+      match: ['how do i stop being shy around my crush'],
+      question: 'How do I stop being shy around my crush? 🌷',
+      answer: 'Take a breath, remember they are just another person, and focus on having a normal conversation instead of trying to be perfect. 🫶'
+    },
+    {
+      match: ['what makes a good relationship'],
+      question: 'What makes a good relationship? 💕',
+      answer: 'Trust, kindness, communication, respect, honesty, and giving each other space are all important. 🌷'
+    },
+    {
+      match: ['how do i tell someone i like them'],
+      question: 'How do I tell someone I like them? 💌',
+      answer: 'Be honest and simple. You could say, "I really enjoy talking to you and I like you." Remember that their feelings may be different, and that\'s okay. 💗'
+    },
+    {
+      match: ['what does a healthy relationship look like'],
+      question: 'What does a healthy relationship look like? 🌸',
+      answer: 'It includes mutual respect, trust, honest communication, kindness, and healthy boundaries. 🫶'
+    },
+    {
+      match: ['how do i get over a crush'],
+      question: 'How do I get over a crush? 🥲',
+      answer: 'Give yourself time, spend time with friends and family, enjoy your hobbies, and focus on things that make you happy. 🌷'
+    },
+    {
+      match: ['why do i get butterflies around someone'],
+      question: 'Why do I get butterflies around someone? 🦋',
+      answer: 'Strong emotions can make your body release hormones that cause feelings like nervousness, excitement, or "butterflies." 💗'
+    },
+    {
+      match: ['what is a first crush'],
+      question: 'What is a first crush? 🎀',
+      answer: 'A first crush is often one of the first times you feel especially excited or interested in someone. 🦋'
+    },
+    {
+      match: ['can friendship turn into love', 'can friendship become love'],
+      question: 'Can friendship turn into love? 💗',
+      answer: "Sometimes people develop romantic feelings for a friend, but friendship does not always become a relationship—and that's completely okay. 🌸"
+    },
+    {
+      match: ['what does butterflies mean in love', 'what do butterflies mean in love'],
+      question: 'What does "butterflies" mean in love? 🦋',
+      answer: '"Butterflies" is a cute way to describe the nervous or excited feeling you might get around someone you like. 💕'
+    },
+    {
+      match: ["how do i know if i'm ready for a relationship", 'how do i know if im ready for a relationship'],
+      question: 'How do I know if I\'m ready for a relationship? 🌷',
+      answer: 'Think about whether you feel comfortable communicating, respecting boundaries, and being yourself without feeling pressured. 🫶'
+    },
+    {
+      match: ["what should i do if my crush doesn't like me back", 'what should i do if my crush doesnt like me back'],
+      question: "What should I do if my crush doesn't like me back? 💕",
+      answer: 'Respect their feelings and give yourself time to move forward. Someone not liking you back does not make you any less amazing. 🌸'
+    },
+    {
+      match: ['what are cute things to say to someone you like'],
+      question: 'What are cute things to say to someone you like? 💌',
+      answer: 'You can say things like "I really enjoy talking to you," "You always make me smile," or "I like spending time with you." 🎀'
+    },
+    {
+      match: ['what is the difference between liking someone and loving someone'],
+      question: 'What is the difference between liking someone and loving someone? ✨',
+      answer: 'Liking someone can be a crush or strong interest, while love usually develops over time through deeper care, trust, respect, and understanding. 💗'
+    },
+    {
+      match: ["what is a crush"],
+      question: "What is a crush?",
+      answer: "A crush is when you feel especially interested or excited about someone. 🦋"
+    },
+    {
+      match: ["why do i think about my crush so much"],
+      question: "Why do I think about my crush so much?",
+      answer: "When someone is interesting or important to you, your brain naturally gives them extra attention. 💗"
+    },
+    {
+      match: ["what does having a crush feel like"],
+      question: "What does having a crush feel like?",
+      answer: "It can feel exciting, happy, confusing, or a little nervous all at once. 🎀"
+    },
+    {
+      match: ["can you have a crush on your best friend"],
+      question: "Can you have a crush on your best friend?",
+      answer: "Yes! Feelings can develop between people who are already close. 🌸"
+    },
+    {
+      match: ["can a crush become a friendship"],
+      question: "Can a crush become a friendship?",
+      answer: "Yes! A crush can sometimes turn into a meaningful friendship. 🫶"
+    },
+    {
+      match: ["what makes someone attractive"],
+      question: "What makes someone attractive?",
+      answer: "Kindness, confidence, humor, respect, and a good personality can all make someone appealing. 🌷"
+    },
+    {
+      match: ["what makes someone a good person to like"],
+      question: "What makes someone a good person to like?",
+      answer: "Someone who respects you, treats people kindly, and makes you feel comfortable is worth appreciating. 💗"
+    },
+    {
+      match: ["what makes a healthy relationship"],
+      question: "What makes a healthy relationship?",
+      answer: "Trust, respect, communication, honesty, kindness, and healthy boundaries. 🫶"
+    },
+    {
+      match: ["what makes a good partner"],
+      question: "What makes a good partner?",
+      answer: "A good partner listens, respects boundaries, communicates honestly, and supports the other person. 🌸"
+    },
+    {
+      match: ["what is trust in a relationship"],
+      question: "What is trust in a relationship?",
+      answer: "Trust means feeling that you can rely on someone and be honest with them. 💕"
+    },
+    {
+      match: ["why is communication important"],
+      question: "Why is communication important?",
+      answer: "It helps people understand each other's feelings, needs, and boundaries. 💬"
+    },
+    {
+      match: ["what are healthy boundaries"],
+      question: "What are healthy boundaries?",
+      answer: "Boundaries are limits that help people feel safe, comfortable, and respected. 🌷"
+    },
+    {
+      match: ["what does respect mean in a relationship"],
+      question: "What does respect mean in a relationship?",
+      answer: "Respect means listening to each other, accepting boundaries, and treating each other kindly. 💗"
+    },
+    {
+      match: ["what is a healthy crush"],
+      question: "What is a healthy crush?",
+      answer: "A healthy crush is a feeling you can enjoy while still respecting yourself, the other person, and their boundaries. 🦋"
+    },
+    {
+      match: ["what do i say after \"hey\""],
+      question: "What do I say after \"hey\"?",
+      answer: "Try \"How's your day going?\" or ask about something you already have in common. 💬"
+    },
+    {
+      match: ["how do i keep a conversation going"],
+      question: "How do I keep a conversation going?",
+      answer: "Ask questions, listen to their answers, and share something about yourself too. 💗"
+    },
+    {
+      match: ["what should i ask my crush"],
+      question: "What should I ask my crush?",
+      answer: "Ask about their hobbies, favorite music, movies, games, pets, or favorite foods. 🎀"
+    },
+    {
+      match: ["how do i make texting less awkward"],
+      question: "How do I make texting less awkward?",
+      answer: "Don't worry about making every message perfect. Just be natural and genuine. 🌸"
+    },
+    {
+      match: ["what if my crush leaves me on read"],
+      question: "What if my crush leaves me on read?",
+      answer: "Give them space and don't assume the worst. They may simply be busy. 💕"
+    },
+    {
+      match: ["what if my crush replies slowly"],
+      question: "What if my crush replies slowly?",
+      answer: "People have different schedules, so a slow reply does not automatically mean anything negative. 🌷"
+    },
+    {
+      match: ["what if i accidentally send the wrong message"],
+      question: "What if I accidentally send the wrong message?",
+      answer: "Don't panic! Correct it, laugh it off if appropriate, and move on. 😭💗"
+    },
+    {
+      match: ["what if i get nervous texting someone"],
+      question: "What if I get nervous texting someone?",
+      answer: "Take a breath and remember that you don't have to write the perfect message. 🫶"
+    },
+    {
+      match: ["what are cute conversation starters"],
+      question: "What are cute conversation starters?",
+      answer: "\"What song are you obsessed with lately?\" or \"What's your favorite thing to do after school?\" 🎀"
+    },
+    {
+      match: ["what should i text someone i haven't talked to in a while"],
+      question: "What should I text someone I haven't talked to in a while?",
+      answer: "Try \"Hey! It's been a while, how have you been?\" 💌"
+    },
+    {
+      match: ["how do i make a conversation more fun"],
+      question: "How do I make a conversation more fun?",
+      answer: "Ask silly questions, share funny stories, or talk about shared interests. ✨"
+    },
+    {
+      match: ["what are good questions to ask a crush"],
+      question: "What are good questions to ask a crush?",
+      answer: "Ask about hobbies, favorite shows, dream places to visit, pets, or funny childhood memories. 🌸"
+    },
+    {
+      match: ["how do i end a conversation nicely"],
+      question: "How do I end a conversation nicely?",
+      answer: "Try \"It was nice talking to you! Talk later!\" 💗"
+    },
+    {
+      match: ["how do i say good morning to someone i like"],
+      question: "How do I say good morning to someone I like?",
+      answer: "A simple \"Good morning! Hope you have a great day!\" is sweet and friendly. ☀️"
+    },
+    {
+      match: ["how do i say goodnight to someone i like"],
+      question: "How do I say goodnight to someone I like?",
+      answer: "Try \"Goodnight! Sleep well and have a good day tomorrow.\" 🌙"
+    },
+    {
+      match: ["what are cute things to text a friend"],
+      question: "What are cute things to text a friend?",
+      answer: "\"You always make me laugh,\" \"I'm glad we're friends,\" or \"Hope you're having a good day!\" 💕"
+    },
+    {
+      match: ["how do i apologize after a misunderstanding"],
+      question: "How do I apologize after a misunderstanding?",
+      answer: "Be honest, explain calmly, and say that you're sorry for your part in the misunderstanding. 🌷"
+    },
+    {
+      match: ["how do i avoid overthinking texts"],
+      question: "How do I avoid overthinking texts?",
+      answer: "Send your message, put your phone down, and focus on something else instead of rereading it. 🦋"
+    },
+    {
+      match: ["what if i'm too shy to confess"],
+      question: "What if I'm too shy to confess?",
+      answer: "You don't have to rush. Take your time and only share your feelings when you feel comfortable. 🌸"
+    },
+    {
+      match: ["what if they don't like me back"],
+      question: "What if they don't like me back?",
+      answer: "Their feelings don't change your worth. Give yourself time and keep being yourself. 🫶"
+    },
+    {
+      match: ["how do i handle rejection"],
+      question: "How do I handle rejection?",
+      answer: "Let yourself feel disappointed, respect their answer, and spend time doing things that make you happy. 🌷"
+    },
+    {
+      match: ["how do i stop thinking about someone"],
+      question: "How do I stop thinking about someone?",
+      answer: "Give yourself time and focus your attention on friends, hobbies, school, and things you enjoy. 💕"
+    },
+    {
+      match: ["why does rejection hurt"],
+      question: "Why does rejection hurt?",
+      answer: "Rejection can feel painful because emotions and expectations are involved. It gets easier with time. 💗"
+    },
+    {
+      match: ["can you still be friends after a crush"],
+      question: "Can you still be friends after a crush?",
+      answer: "Yes, if both people are comfortable and can respect each other's feelings and boundaries. 🫶"
+    },
+    {
+      match: ["how do i move on from someone"],
+      question: "How do I move on from someone?",
+      answer: "Accept your feelings, give yourself time, and focus on your own life and happiness. 🌷"
+    },
+    {
+      match: ["how do i stop checking their messages"],
+      question: "How do I stop checking their messages?",
+      answer: "Put your phone away for a while and give yourself something else fun to focus on. 🎀"
+    },
+    {
+      match: ["how do i deal with jealousy"],
+      question: "How do I deal with jealousy?",
+      answer: "Notice the feeling without acting on it, communicate calmly, and remind yourself that you cannot control another person's feelings. 💗"
+    },
+    {
+      match: ["why do i feel jealous"],
+      question: "Why do I feel jealous?",
+      answer: "Jealousy can happen when you are worried about losing someone's attention or feeling left out. 🌸"
+    },
+    {
+      match: ["what should i do if my crush likes someone else"],
+      question: "What should I do if my crush likes someone else?",
+      answer: "Respect their feelings and remember that someone else's choice does not determine your worth. 🫶"
+    },
+    {
+      match: ["what if my friend likes the same person"],
+      question: "What if my friend likes the same person?",
+      answer: "Talk honestly and kindly with your friend instead of turning it into a competition. 💕"
+    },
+    {
+      match: ["should i tell my friend about my crush"],
+      question: "Should I tell my friend about my crush?",
+      answer: "If you trust them and feel comfortable, you can share it, but you never have to. 🌷"
+    },
+    {
+      match: ["what if my crush is my best friend"],
+      question: "What if my crush is my best friend?",
+      answer: "Take your time and think about what you want before deciding whether to share your feelings. 💗"
+    },
+    {
+      match: ["what if i'm scared of ruining a friendship"],
+      question: "What if I'm scared of ruining a friendship?",
+      answer: "It's okay to wait until you feel ready. Your friendship and your comfort matter too. 🌸"
+    },
+    {
+      match: ["how do i handle awkward feelings"],
+      question: "How do I handle awkward feelings?",
+      answer: "Give yourself time, stay respectful, and remember that feelings do not have to be solved immediately. 🦋"
+    },
+    {
+      match: ["how do i accept someone's feelings"],
+      question: "How do I accept someone's feelings?",
+      answer: "Listen without judging and respect what they feel, even if you feel differently. 💕"
+    },
+    {
+      match: ["how do i focus on myself after a crush"],
+      question: "How do I focus on myself after a crush?",
+      answer: "Spend time on hobbies, friends, goals, and activities that make you feel happy and confident. ✨"
+    },
+    {
+      match: ["what are cute date ideas"],
+      question: "What are cute date ideas?",
+      answer: "Try a picnic, a café visit, a walk in a public place, or a fun activity you both enjoy. 🌷"
+    },
+    {
+      match: ["what are fun things to do with someone you like"],
+      question: "What are fun things to do with someone you like?",
+      answer: "Play games, talk, draw together, study together, or enjoy a shared hobby. 🎀"
+    },
+    {
+      match: ["what are good friendship activities"],
+      question: "What are good friendship activities?",
+      answer: "Movie nights, crafts, board games, baking, walks, or just talking about random things. 💗"
+    },
+    {
+      match: ["what makes a memorable day"],
+      question: "What makes a memorable day?",
+      answer: "Spending time with people you care about and doing something meaningful or fun. 🌸"
+    },
+    {
+      match: ["what are cute things friends can do together"],
+      question: "What are cute things friends can do together?",
+      answer: "Make bracelets, take silly photos, bake something, play games, or have a mini picnic. 🦋"
+    },
+    {
+      match: ["what are fun conversation games"],
+      question: "What are fun conversation games?",
+      answer: "Try \"Would You Rather?\", \"Two Truths and a Lie,\" or \"This or That.\" 🎀"
+    },
+    {
+      match: ["what are good questions for a sleepover"],
+      question: "What are good questions for a sleepover?",
+      answer: "Ask about favorite memories, dream vacations, hobbies, funny stories, or totally random things. 🌙"
+    },
+    {
+      match: ["what are fun things to talk about"],
+      question: "What are fun things to talk about?",
+      answer: "Music, movies, pets, dreams, hobbies, school stories, and weird \"what if\" questions. ✨"
+    },
+    {
+      match: ["what are cute friendship traditions"],
+      question: "What are cute friendship traditions?",
+      answer: "Matching bracelets, yearly photos, inside jokes, birthday traditions, or a special friendship playlist. 💕"
+    },
+    {
+      match: ["what makes someone a good friend"],
+      question: "What makes someone a good friend?",
+      answer: "Kindness, honesty, trust, support, and respecting each other's boundaries. 🫶"
+    },
+    {
+      match: ["how do i make new friends"],
+      question: "How do I make new friends?",
+      answer: "Be friendly, join activities, start conversations, and look for people with shared interests. 🌷"
+    },
+    {
+      match: ["how do i become closer to a friend"],
+      question: "How do I become closer to a friend?",
+      answer: "Spend time together, listen to them, share interests, and be supportive. 💗"
+    },
+    {
+      match: ["how do i make someone feel appreciated"],
+      question: "How do I make someone feel appreciated?",
+      answer: "Thank them, listen to them, remember important things, and tell them that you value them. 🌸"
+    },
+    {
+      match: ["how do i show someone i care"],
+      question: "How do I show someone I care?",
+      answer: "Be kind, check in on them, listen, and support them when they need you. 💕"
+    },
+    {
+      match: ["what is a friendship crush"],
+      question: "What is a friendship crush?",
+      answer: "It can mean really liking someone's personality and wanting to become closer friends. 🎀"
+    },
+    {
+      match: ["can friends have crushes on each other"],
+      question: "Can friends have crushes on each other?",
+      answer: "Yes, friends can sometimes develop romantic feelings for each other. 🦋"
+    },
+    {
+      match: ["how do i support a friend with a crush"],
+      question: "How do I support a friend with a crush?",
+      answer: "Listen without making fun of them and give advice only when they want it. 💗"
+    },
+    {
+      match: ["what should i say to a sad friend"],
+      question: "What should I say to a sad friend?",
+      answer: "Try \"I'm here for you\" or \"You don't have to deal with this alone.\" 🌷"
+    },
+    {
+      match: ["how do i cheer up my friend"],
+      question: "How do I cheer up my friend?",
+      answer: "Listen, spend time with them, make them laugh if they want, or simply be there. 🫶"
+    },
+    {
+      match: ["what makes a friendship last"],
+      question: "What makes a friendship last?",
+      answer: "Trust, communication, kindness, respect, and making an effort to stay connected. 💕"
+    },
+    {
+      match: ["what does \"butterflies\" mean"],
+      question: "What does \"butterflies\" mean?",
+      answer: "It describes the nervous or excited feeling you can get around someone you like. 🦋"
+    },
+    {
+      match: ["what does \"having feelings\" mean"],
+      question: "What does \"having feelings\" mean?",
+      answer: "It usually means developing romantic or emotional interest in someone. 💗"
+    },
+    {
+      match: ["what does \"catching feelings\" mean"],
+      question: "What does \"catching feelings\" mean?",
+      answer: "It is casual slang for starting to develop stronger feelings for someone. 🎀"
+    },
+    {
+      match: ["what does \"crushing\" mean"],
+      question: "What does \"crushing\" mean?",
+      answer: "It means having a strong romantic interest in someone. 🌸"
+    },
+    {
+      match: ["what does \"rizz\" mean"],
+      question: "What does \"rizz\" mean?",
+      answer: "\"Rizz\" is slang for charm or the ability to attract someone. 😭✨"
+    },
+    {
+      match: ["what does \"friendzone\" mean"],
+      question: "What does \"friendzone\" mean?",
+      answer: "It is a casual term for when one person wants romance but the other wants friendship. 🌷"
+    },
+    {
+      match: ["what does \"green flag\" mean"],
+      question: "What does \"green flag\" mean?",
+      answer: "A green flag is a positive sign, such as kindness, honesty, respect, or good communication. 💚"
+    },
+    {
+      match: ["what does \"red flag\" mean"],
+      question: "What does \"red flag\" mean?",
+      answer: "A red flag is a warning sign that something may be unhealthy or concerning. 🚩"
+    },
+    {
+      match: ["what does \"situationship\" mean"],
+      question: "What does \"situationship\" mean?",
+      answer: "It usually describes a connection that feels more than friendship but isn't clearly defined as a relationship. 💭"
+    },
+    {
+      match: ["what does \"love language\" mean"],
+      question: "What does \"love language\" mean?",
+      answer: "It is a popular way of describing how people prefer to give or receive affection. 💕"
+    },
+    {
+      match: ["what does \"heartbreak\" mean"],
+      question: "What does \"heartbreak\" mean?",
+      answer: "Heartbreak is intense sadness that can happen after losing an important relationship or connection. 💗"
+    },
+    {
+      match: ["what does \"true love\" mean"],
+      question: "What does \"true love\" mean?",
+      answer: "People use the phrase for deep, lasting care based on trust, respect, and affection. 🌷"
+    },
+    {
+      match: ["what does \"first love\" mean"],
+      question: "What does \"first love\" mean?",
+      answer: "It usually refers to the first person someone experiences strong romantic feelings for. 🦋"
+    },
+    {
+      match: ["what does \"puppy love\" mean"],
+      question: "What does \"puppy love\" mean?",
+      answer: "It is a casual term for an early or youthful romantic crush. 🎀"
+    },
+    {
+      match: ["what does \"soulmate\" mean"],
+      question: "What does \"soulmate\" mean?",
+      answer: "A soulmate is a person someone feels deeply connected to; it is a personal or cultural idea rather than a scientific fact. ✨"
+    },
+    {
+      match: ["what does \"falling in love\" mean"],
+      question: "What does \"falling in love\" mean?",
+      answer: "It describes gradually developing strong romantic feelings and attachment toward someone. 💗"
+    },
+    {
+      match: ["what does \"unrequited love\" mean"],
+      question: "What does \"unrequited love\" mean?",
+      answer: "It means having romantic feelings that are not returned by the other person. 🌸"
+    },
+    {
+      match: ["what does \"romantic feelings\" mean"],
+      question: "What does \"romantic feelings\" mean?",
+      answer: "They are feelings of attraction, affection, or interest that can make you want a closer relationship with someone. 💕"
+    },
+    {
+      match: ["what does \"platonic love\" mean"],
+      question: "What does \"platonic love\" mean?",
+      answer: "It means deep care and affection without romantic feelings. 🫶"
+    },
+    {
+      match: ["what does \"bestie love\" mean"],
+      question: "What does \"bestie love\" mean?",
+      answer: "It is a fun way to describe the strong love and appreciation between best friends. 🎀"
+    },
+    {
+      match: ["why do people get crushes"],
+      question: "Why do people get crushes?",
+      answer: "Crushes can happen because of attraction, shared interests, personality, or simply enjoying someone's company. 💗"
+    },
+    {
+      match: ["why do people blush around their crush"],
+      question: "Why do people blush around their crush?",
+      answer: "Strong emotions can increase blood flow near the skin, which can cause blushing. 🌸"
+    },
+    {
+      match: ["why do i feel nervous around someone"],
+      question: "Why do I feel nervous around someone?",
+      answer: "Your brain can react to excitement or uncertainty by making you feel nervous. 🦋"
+    },
+    {
+      match: ["why does my heart feel like it beats faster"],
+      question: "Why does my heart feel like it beats faster?",
+      answer: "Excitement or nervousness can activate your body's stress response and make your heartbeat faster. 💗"
+    },
+    {
+      match: ["why do i smile when i see someone"],
+      question: "Why do I smile when I see someone?",
+      answer: "Seeing someone you like or enjoy can trigger positive emotions that naturally make you smile. 😊"
+    },
+    {
+      match: ["why do i remember tiny things about someone"],
+      question: "Why do I remember tiny things about someone?",
+      answer: "When someone matters to you, your brain may pay more attention to details about them. 🌷"
+    },
+    {
+      match: ["why do i replay conversations in my head"],
+      question: "Why do I replay conversations in my head?",
+      answer: "Your brain sometimes reviews important or emotional moments to understand what happened. 💭"
+    },
+    {
+      match: ["why do i get nervous before texting"],
+      question: "Why do I get nervous before texting?",
+      answer: "You might be worried about how the other person will respond, especially if you care about their opinion. 💌"
+    },
+    {
+      match: ["why do i overthink what someone said"],
+      question: "Why do I overthink what someone said?",
+      answer: "Uncertainty can make your brain search for extra meaning, even when there may not be any. 🌸"
+    },
+    {
+      match: ["why do i miss someone"],
+      question: "Why do I miss someone?",
+      answer: "Missing someone can happen when you care about them and notice their absence. 💗"
+    },
+    {
+      match: ["why do people fall in love"],
+      question: "Why do people fall in love?",
+      answer: "Attraction, shared experiences, emotional connection, trust, and affection can all contribute to romantic feelings. 🦋"
+    },
+    {
+      match: ["why can feelings change"],
+      question: "Why can feelings change?",
+      answer: "People grow and their experiences change, so emotions can naturally change over time. 🌷"
+    },
+    {
+      match: ["why can friendships feel so special"],
+      question: "Why can friendships feel so special?",
+      answer: "Friends can provide support, understanding, laughter, and a sense of belonging. 💕"
+    },
+    {
+      match: ["why does kindness make people feel closer"],
+      question: "Why does kindness make people feel closer?",
+      answer: "Kindness helps create trust, safety, and positive emotional connections. 🫶"
+    },
+    {
+      match: ["why does trust take time"],
+      question: "Why does trust take time?",
+      answer: "Trust grows through repeated experiences of honesty, reliability, and respect. 🌸"
+    },
+    {
+      match: ["why can communication solve problems"],
+      question: "Why can communication solve problems?",
+      answer: "Talking openly can help people understand each other and find solutions together. 💬"
+    },
+    {
+      match: ["why do people become attached"],
+      question: "Why do people become attached?",
+      answer: "Shared experiences, care, trust, and emotional connection can create strong bonds. 💗"
+    },
+    {
+      match: ["why do people feel jealous"],
+      question: "Why do people feel jealous?",
+      answer: "Jealousy can come from insecurity, fear of losing attention, or feeling left out. 🌷"
+    },
+    {
+      match: ["why does rejection feel uncomfortable"],
+      question: "Why does rejection feel uncomfortable?",
+      answer: "Humans naturally care about belonging and connection, so rejection can trigger strong emotions. 🦋"
+    },
+    {
+      match: ["why is it important to respect feelings"],
+      question: "Why is it important to respect feelings?",
+      answer: "Everyone has their own emotions, and respecting them helps create healthy relationships. 💕"
+    },
+    {
+      match: ["what are cute nicknames for friends"],
+      question: "What are cute nicknames for friends?",
+      answer: "Bestie, best bud, sunshine, star, cupcake, or simply a funny inside-joke nickname. 🎀"
+    },
+    {
+      match: ["what are cute nicknames for someone special"],
+      question: "What are cute nicknames for someone special?",
+      answer: "You can use sweet, personal nicknames that both people are comfortable with. 💗"
+    },
+    {
+      match: ["what are cute compliments"],
+      question: "What are cute compliments?",
+      answer: "\"You always make people smile,\" \"You're really thoughtful,\" or \"I love your sense of humor.\" 🌸"
+    },
+    {
+      match: ["what is a sweet compliment that isn't about looks"],
+      question: "What is a sweet compliment that isn't about looks?",
+      answer: "\"You make people feel comfortable being themselves.\" 🫶"
+    },
+    {
+      match: ["what can i say to make someone smile"],
+      question: "What can I say to make someone smile?",
+      answer: "\"I'm really glad I know you!\" 💕"
+    },
+    {
+      match: ["what are wholesome things to say to a friend"],
+      question: "What are wholesome things to say to a friend?",
+      answer: "\"I'm proud of you,\" \"I'm here if you need me,\" or \"You make my day better.\" 🌷"
+    },
+    {
+      match: ["how do i compliment someone's personality"],
+      question: "How do I compliment someone's personality?",
+      answer: "Mention something specific, like their kindness, humor, creativity, or patience. 💗"
+    },
+    {
+      match: ["how do i tell someone i appreciate them"],
+      question: "How do I tell someone I appreciate them?",
+      answer: "Say exactly what you appreciate, such as \"Thank you for always listening to me.\" 🌸"
+    },
+    {
+      match: ["how do i thank someone i care about"],
+      question: "How do I thank someone I care about?",
+      answer: "Be genuine and specific about what they did that meant something to you. 💕"
+    },
+    {
+      match: ["how do i make someone feel included"],
+      question: "How do I make someone feel included?",
+      answer: "Invite them into conversations and activities and make sure they feel welcome. 🫶"
+    },
+    {
+      match: ["how do i tell a friend they matter"],
+      question: "How do I tell a friend they matter?",
+      answer: "Tell them directly: \"You're important to me and I'm really glad we're friends.\" 🎀"
+    },
+    {
+      match: ["how do i write a cute friendship message"],
+      question: "How do I write a cute friendship message?",
+      answer: "Keep it personal, mention a favorite memory, and say why you appreciate them. 💌"
+    },
+    {
+      match: ["how do i write a birthday message for my bestie"],
+      question: "How do I write a birthday message for my bestie?",
+      answer: "Mention a happy memory and wish them a wonderful year ahead. 🎂💗"
+    },
+    {
+      match: ["what are cute friendship captions"],
+      question: "What are cute friendship captions?",
+      answer: "\"Partners in chaos 🎀,\" \"Forever besties 🦋,\" or \"Making memories together ✨.\""
+    },
+    {
+      match: ["what are cute friendship emojis"],
+      question: "What are cute friendship emojis?",
+      answer: "💗 🫶 🎀 🌸 🦋 ✨ 🌷 🥹 💕 👯"
+    },
+    {
+      match: ["what are cute ways to say \"i appreciate you\""],
+      question: "What are cute ways to say \"I appreciate you\"?",
+      answer: "\"You mean so much to me,\" \"I'm lucky to know you,\" or \"Thank you for being you.\" 🌷"
+    },
+    {
+      match: ["how do i make someone feel special"],
+      question: "How do I make someone feel special?",
+      answer: "Listen to them, remember little things, and show genuine appreciation. 💗"
+    },
+    {
+      match: ["what is a meaningful compliment"],
+      question: "What is a meaningful compliment?",
+      answer: "A meaningful compliment notices someone's character, effort, kindness, or creativity. 🌸"
+    },
+    {
+      match: ["what is a kind thing to say today"],
+      question: "What is a kind thing to say today?",
+      answer: "\"You're doing better than you think, and you deserve kindness too.\" 🫶"
+    },
+    {
+      match: ["how can i brighten someone's day"],
+      question: "How can I brighten someone's day?",
+      answer: "Give them a genuine compliment, help them with something, or simply make them laugh. ✨"
+    },
+    {
+      match: ["what if my crush says \"hey\""],
+      question: "What if my crush says \"hey\"?",
+      answer: "Say \"Hey!\" back and ask how their day is going. 🌷"
+    },
+    {
+      match: ["what if my crush compliments me"],
+      question: "What if my crush compliments me?",
+      answer: "Say thank you and give them a genuine compliment back if you want to. 💗"
+    },
+    {
+      match: ["what if my crush asks me a question"],
+      question: "What if my crush asks me a question?",
+      answer: "Answer naturally and ask them something back to keep the conversation going. 💬"
+    },
+    {
+      match: ["what if my crush sits next to me"],
+      question: "What if my crush sits next to me?",
+      answer: "Stay relaxed and treat it like a normal conversation. 🎀"
+    },
+    {
+      match: ["what if my crush smiles at me"],
+      question: "What if my crush smiles at me?",
+      answer: "Smile back! You don't need to overthink it. 😊"
+    },
+    {
+      match: ["what if my crush remembers something i said"],
+      question: "What if my crush remembers something I said?",
+      answer: "That's a nice sign that they were paying attention, but it doesn't automatically tell you how they feel. 💕"
+    },
+    {
+      match: ["what if my crush asks to hang out"],
+      question: "What if my crush asks to hang out?",
+      answer: "If you're comfortable, suggest an activity you both enjoy and make sure the plan feels safe and appropriate. 🌸"
+    },
+    {
+      match: ["what if my crush tells me a secret"],
+      question: "What if my crush tells me a secret?",
+      answer: "Listen respectfully and don't share private information without permission. 🫶"
+    },
+    {
+      match: ["what if my crush seems nervous around me"],
+      question: "What if my crush seems nervous around me?",
+      answer: "They might simply be shy or nervous, so give them space and be friendly. 🦋"
+    },
+    {
+      match: ["what if i accidentally make eye contact"],
+      question: "What if I accidentally make eye contact?",
+      answer: "Smile if you want to and carry on! It happens all the time. 😭💗"
+    },
+    {
+      match: ["what if i panic when talking to my crush"],
+      question: "What if I panic when talking to my crush?",
+      answer: "Take a breath and remember that you don't have to impress them. Just be yourself. 🌷"
+    },
+    {
+      match: ["what if i say something embarrassing"],
+      question: "What if I say something embarrassing?",
+      answer: "Everyone says awkward things sometimes. Laugh it off and move on. 🎀"
+    },
+    {
+      match: ["what if my crush is shy too"],
+      question: "What if my crush is shy too?",
+      answer: "Keep conversations simple and give both of you time to feel comfortable. 🌸"
+    },
+    {
+      match: ["what if we both like each other"],
+      question: "What if we both like each other?",
+      answer: "Talk honestly, take things slowly, and make sure both people feel comfortable. 💕"
+    },
+    {
+      match: ["what if i'm not sure how i feel"],
+      question: "What if I'm not sure how I feel?",
+      answer: "That's completely okay. You don't have to label your feelings immediately. 🫶"
+    },
+    {
+      match: ["what if i need more time"],
+      question: "What if I need more time?",
+      answer: "Take your time. You never have to rush your feelings for anyone. 🌷"
+    },
+    {
+      match: ["what if my friends tease me about my crush"],
+      question: "What if my friends tease me about my crush?",
+      answer: "Tell them kindly if the teasing makes you uncomfortable and ask them to stop. 💗"
+    },
+    {
+      match: ["what if someone asks who my crush is"],
+      question: "What if someone asks who my crush is?",
+      answer: "You can tell them, joke about it, or simply say you'd rather keep it private. 🎀"
+    },
+    {
+      match: ["what if i don't want a relationship"],
+      question: "What if I don't want a relationship?",
+      answer: "That's completely okay. You can enjoy friendships and focus on yourself. 🌸"
+    },
+    {
+      match: ["what if i just want to stay friends"],
+      question: "What if I just want to stay friends?",
+      answer: "Be honest and kind about it. Friendship is valuable too. 💕"
+    },
+    {
+      match: ["is love supposed to feel perfect"],
+      question: "Is love supposed to feel perfect?",
+      answer: "No. Real relationships can include misunderstandings and challenges, which should be handled with respect and communication. 🌷"
+    },
+    {
+      match: ["is it normal to be nervous around someone"],
+      question: "Is it normal to be nervous around someone?",
+      answer: "Yes! Excitement and uncertainty can both cause nervousness. 🦋"
+    },
+    {
+      match: ["is it normal to have a crush"],
+      question: "Is it normal to have a crush?",
+      answer: "Yes, crushes are a normal part of growing up and experiencing emotions. 💗"
+    },
+    {
+      match: ["is it okay not to have a crush"],
+      question: "Is it okay not to have a crush?",
+      answer: "Absolutely! Everyone experiences relationships and feelings differently. 🌸"
+    },
+    {
+      match: ["is it okay to change your mind"],
+      question: "Is it okay to change your mind?",
+      answer: "Yes. Your feelings can change, and you're allowed to change your mind. 🫶"
+    },
+    {
+      match: ["is it okay to say no"],
+      question: "Is it okay to say no?",
+      answer: "Yes. Everyone has the right to set boundaries and say no. 💕"
+    },
+    {
+      match: ["is it okay to take things slowly"],
+      question: "Is it okay to take things slowly?",
+      answer: "Definitely. There is no required timeline for relationships or feelings. 🌷"
+    },
+    {
+      match: ["is it okay to have boundaries"],
+      question: "Is it okay to have boundaries?",
+      answer: "Yes! Healthy boundaries help people feel safe and respected. 💗"
+    },
+    {
+      match: ["is it okay to be single"],
+      question: "Is it okay to be single?",
+      answer: "Absolutely! Being single can be happy, fulfilling, and completely normal. 🎀"
+    },
+    {
+      match: ["is it okay to like someone who doesn't like you back"],
+      question: "Is it okay to like someone who doesn't like you back?",
+      answer: "Yes. You can't control your feelings, but you can respect their feelings and boundaries. 🌸"
+    },
+    {
+      match: ["is it possible to have more than one crush"],
+      question: "Is it possible to have more than one crush?",
+      answer: "Yes, feelings can be complicated and different people can catch your attention. 🦋"
+    },
+    {
+      match: ["can a crush disappear"],
+      question: "Can a crush disappear?",
+      answer: "Yes. Feelings can naturally fade or change over time. 🌷"
+    },
+    {
+      match: ["can feelings come back"],
+      question: "Can feelings come back?",
+      answer: "Sometimes feelings can return, but emotions are different for everyone. 💗"
+    },
+    {
+      match: ["can you love someone without dating them"],
+      question: "Can you love someone without dating them?",
+      answer: "Yes. Love and care can exist in friendships, families, and other relationships too. 🫶"
+    },
+    {
+      match: ["can best friends stay best friends forever"],
+      question: "Can best friends stay best friends forever?",
+      answer: "Friendships can last a very long time when both people continue to care, communicate, and respect each other. 💕"
+    },
+    {
+      match: ["can people care about each other without dating"],
+      question: "Can people care about each other without dating?",
+      answer: "Absolutely! Caring deeply about someone doesn't always mean romance. 🌸"
+    },
+    {
+      match: ["can relationships be different for everyone"],
+      question: "Can relationships be different for everyone?",
+      answer: "Yes. Every person's relationships, boundaries, and experiences can be different. 🎀"
+    },
+    {
+      match: ["does everyone experience love the same way"],
+      question: "Does everyone experience love the same way?",
+      answer: "No. People experience and express emotions in many different ways. 💗"
+    },
+    {
+      match: ["do feelings always make sense"],
+      question: "Do feelings always make sense?",
+      answer: "Nope! Feelings can be confusing, and it's okay to take time to understand them. 🦋"
+    },
+    {
+      match: ["does love require trust"],
+      question: "Does love require trust?",
+      answer: "Healthy romantic relationships need trust, respect, and honest communication. 🌷"
+    },
+    {
+      match: ["why is my crush ignoring me 😭"],
+      question: "Why is my crush ignoring me? 😭",
+      answer: "There could be many reasons, including being busy or needing space. Don't immediately assume the worst. 💗"
+    },
+    {
+      match: ["why am i thinking about my crush at 3 am 😭"],
+      question: "Why am I thinking about my crush at 3 AM? 😭",
+      answer: "Your brain apparently decided bedtime was the perfect time for a full emotional documentary. 💀🦋"
+    },
+    {
+      match: ["why did i smile at my phone"],
+      question: "Why did I smile at my phone?",
+      answer: "Maybe that message made you really happy! 😭💗"
+    },
+    {
+      match: ["why am i nervous for no reason"],
+      question: "Why am I nervous for no reason?",
+      answer: "Sometimes excitement and uncertainty can make your body feel nervous even when nothing is wrong. 🌸"
+    },
+    {
+      match: ["why did i reread that message 20 times"],
+      question: "Why did I reread that message 20 times?",
+      answer: "Because apparently your brain needed a full investigation. 😭🔎"
+    },
+    {
+      match: ["why do i suddenly care about my hairstyle 🎀"],
+      question: "Why do I suddenly care about my hairstyle? 🎀",
+      answer: "When you want to make a good impression, you may naturally pay more attention to how you present yourself. 🌷"
+    },
+    {
+      match: ["why does \"hey\" suddenly feel so important 😭"],
+      question: "Why does \"hey\" suddenly feel so important? 😭",
+      answer: "Because when you like someone, even a tiny message can feel like BIG NEWS. 💌"
+    },
+    {
+      match: ["why did one text make my whole day"],
+      question: "Why did one text make my whole day?",
+      answer: "Positive messages from people you care about can create a little boost of happiness. 💗"
+    },
+    {
+      match: ["why am i analyzing an emoji 💀"],
+      question: "Why am I analyzing an emoji? 💀",
+      answer: "Because one tiny emoji apparently deserves a 45-minute investigation. 😭🔎"
+    },
+    {
+      match: ["why did they use a different emoji today"],
+      question: "Why did they use a different emoji today?",
+      answer: "It could mean absolutely nothing. People use emojis differently all the time! 😂"
+    },
+    {
+      match: ["why am i overthinking a simple \"okay\""],
+      question: "Why am I overthinking a simple \"okay\"?",
+      answer: "Your brain may be searching for hidden meaning when there might not be any. 🌸"
+    },
+    {
+      match: ["why did my brain replay that conversation"],
+      question: "Why did my brain replay that conversation?",
+      answer: "Emotional or important conversations often stick in our minds. 💭"
+    },
+    {
+      match: ["why does my crush have to be so confusing 😭"],
+      question: "Why does my crush have to be so confusing? 😭",
+      answer: "Because crushes apparently come with a free subscription to overthinking. 💀💗"
+    },
+    {
+      match: ["why do i suddenly forget how to speak"],
+      question: "Why do I suddenly forget how to speak?",
+      answer: "Nervousness can make your brain temporarily forget every word you have ever learned. 😭"
+    },
+    {
+      match: ["why does eye contact feel like a whole movie 😭"],
+      question: "Why does eye contact feel like a whole movie? 😭",
+      answer: "Because when you like someone, tiny moments can suddenly feel VERY dramatic. 🎬🦋"
+    },
+    {
+      match: ["why do butterflies have to exist 🦋"],
+      question: "Why do butterflies have to exist? 🦋",
+      answer: "Your body is basically saying \"WARNING: EMOTIONS DETECTED.\" 😭💗"
+    },
+    {
+      match: ["why did my brain choose this person"],
+      question: "Why did my brain choose THIS person?",
+      answer: "Feelings don't always follow a logical plan. Sometimes your brain just goes: \"Yep. Them.\" 😭🎀"
+    },
+    {
+      match: ["why is having a crush so confusing"],
+      question: "Why is having a crush so confusing?",
+      answer: "Because excitement, nervousness, happiness, and uncertainty can all happen at once. 🦋"
+    },
+    {
+      match: ["why am i smiling while reading this"],
+      question: "Why am I smiling while reading this?",
+      answer: "Because maybe your brain just found something cute. 😭💗"
+    },
+    {
+      match: ["why is love so complicated but so cute 💗"],
+      question: "Why is love so complicated but so cute? 💗",
+      answer: "Because humans have complicated feelings… and apparently we decided to add butterflies and dramatic texting too. 😭🦋🎀"
+    },
+    {
+      match: ['who is arzish'],
+      question: 'Who is Arzish?',
+      answer: 'Arzish is a lil girl who made this webpage.'
+    },
+    {
+      match: ["how many countries are there in the world"],
+      question: "How many countries are there in the world?",
+      answer: "There are 195 countries in the world. 🌍✨"
+    },
+    {
+      match: ["what is the currency of the united kingdom"],
+      question: "What is the currency of the United Kingdom?",
+      answer: "The currency of the United Kingdom is the pound sterling. 💷"
+    },
+    {
+      match: ["what is the capital of canada"],
+      question: "What is the capital of Canada?",
+      answer: "Ottawa is the capital of Canada. 🇨🇦"
+    },
+    {
+      match: ["what is the capital of italy"],
+      question: "What is the capital of Italy?",
+      answer: "Rome is the capital of Italy. 🇮🇹✨"
+    },
+    {
+      match: ["what is the capital of egypt"],
+      question: "What is the capital of Egypt?",
+      answer: "Cairo is the capital of Egypt. 🇪🇬"
+    },
+    {
+      match: ["which country has the most people"],
+      question: "Which country has the most people?",
+      answer: "India has the largest population of any country. 🌏"
+    },
+    {
+      match: ["which country is the smallest by population"],
+      question: "Which country is the smallest by population?",
+      answer: "Vatican City has the smallest population of any country. ✨"
+    },
+    {
+      match: ["what is the longest wall in the world"],
+      question: "What is the longest wall in the world?",
+      answer: "The Great Wall of China is the longest wall in the world. 🧱🐉"
+    },
+    {
+      match: ["who invented the light bulb"],
+      question: "Who invented the light bulb?",
+      answer: "Thomas Edison is widely credited with commercializing the practical light bulb. 💡✨"
+    },
+    {
+      match: ["who invented gravity"],
+      question: "Who invented gravity?",
+      answer: "Nobody invented gravity — Isaac Newton described it with his law of universal gravitation. 🍎🌎"
+    },
+    {
+      match: ["who painted the sistine chapel ceiling"],
+      question: "Who painted the Sistine Chapel ceiling?",
+      answer: "Michelangelo painted the Sistine Chapel ceiling. 🎨✨"
+    },
+    {
+      match: ["who composed the ninth symphony"],
+      question: "Who composed the Ninth Symphony?",
+      answer: "Ludwig van Beethoven composed the Ninth Symphony. 🎻"
+    },
+    {
+      match: ["who wrote pride and prejudice"],
+      question: "Who wrote Pride and Prejudice?",
+      answer: "Jane Austen wrote Pride and Prejudice. 📖✨"
+    },
+    {
+      match: ["who discovered gravity's laws of motion"],
+      question: "Who discovered gravity's laws of motion?",
+      answer: "Isaac Newton formulated the laws of motion. 🍎"
+    },
+    {
+      match: ["who was albert einstein"],
+      question: "Who was Albert Einstein?",
+      answer: "Albert Einstein was a physicist best known for developing the theory of relativity. 🧠✨"
+    },
+    {
+      match: ["what sport uses a shuttlecock"],
+      question: "What sport uses a shuttlecock?",
+      answer: "Badminton uses a shuttlecock. 🏸"
+    },
+    {
+      match: ["how many players are on a soccer team"],
+      question: "How many players are on a soccer team?",
+      answer: "A soccer team has 11 players on the field. ⚽"
+    },
+    {
+      match: ["how many players are on a basketball team"],
+      question: "How many players are on a basketball team?",
+      answer: "A basketball team has 5 players on the court at a time. 🏀"
+    },
+    {
+      match: ["what is the national sport of japan"],
+      question: "What is the national sport of Japan?",
+      answer: "Sumo wrestling is often considered Japan's national sport. 🇯🇵"
+    },
+    {
+      match: ["how often are the olympic games held"],
+      question: "How often are the Olympic Games held?",
+      answer: "The Olympic Games are held every 4 years. 🥇✨"
+    },
+    {
+      match: ["what does \"break a leg\" mean"],
+      question: "What does \"break a leg\" mean?",
+      answer: "It's a way of wishing someone good luck, especially before a performance. 🎭✨"
+    },
+    {
+      match: ["what does \"piece of cake\" mean"],
+      question: "What does \"piece of cake\" mean?",
+      answer: "It means something is very easy to do. 🍰"
+    },
+    {
+      match: ["what does \"spill the beans\" mean"],
+      question: "What does \"spill the beans\" mean?",
+      answer: "It means to reveal a secret. 🫘😭"
+    },
+    {
+      match: ["what does \"under the weather\" mean"],
+      question: "What does \"under the weather\" mean?",
+      answer: "It means feeling sick or unwell. 🌧️"
+    },
+    {
+      match: ["what does \"hit the sack\" mean"],
+      question: "What does \"hit the sack\" mean?",
+      answer: "It means to go to bed. 🛏️💤"
+    },
+    {
+      match: ["what does \"cost an arm and a leg\" mean"],
+      question: "What does \"cost an arm and a leg\" mean?",
+      answer: "It means something is very expensive. 💸"
+    },
+    {
+      match: ["what does \"once in a blue moon\" mean"],
+      question: "What does \"once in a blue moon\" mean?",
+      answer: "It means something that happens very rarely. 🌙✨"
+    },
+    {
+      match: ["what does \"the ball is in your court\" mean"],
+      question: "What does \"the ball is in your court\" mean?",
+      answer: "It means it's your turn to make a decision or take action. 🎾"
+    },
+    {
+      match: ["what is the capital of spain"],
+      question: "What is the capital of Spain?",
+      answer: "Madrid is the capital of Spain. 🇪🇸"
+    },
+    {
+      match: ["what is the capital of germany"],
+      question: "What is the capital of Germany?",
+      answer: "Berlin is the capital of Germany. 🇩🇪"
+    },
+    {
+      match: ["what is the capital of brazil"],
+      question: "What is the capital of Brazil?",
+      answer: "Brasília is the capital of Brazil. 🇧🇷"
+    },
+    {
+      match: ["what is the capital of south korea"],
+      question: "What is the capital of South Korea?",
+      answer: "Seoul is the capital of South Korea. 🇰🇷"
+    },
+    {
+      match: ["what is the tallest animal in the world"],
+      question: "What is the tallest animal in the world?",
+      answer: "The giraffe is the tallest animal in the world. 🦒✨"
+    },
+    {
+      match: ["what is the fastest bird in the world"],
+      question: "What is the fastest bird in the world?",
+      answer: "The peregrine falcon is the fastest bird, especially while diving. 🦅💨"
+    },
+    {
+      match: ["what is the loudest animal in the world"],
+      question: "What is the loudest animal in the world?",
+      answer: "The blue whale is considered one of the loudest animals on Earth. 🐋🔊"
+    },
+    {
+      match: ["which animal sleeps the most"],
+      question: "Which animal sleeps the most?",
+      answer: "Koalas can sleep up to around 20 hours a day. 🐨💤"
+    },
+    {
+      match: ["which animal has the longest lifespan"],
+      question: "Which animal has the longest lifespan?",
+      answer: "Certain species, like the Greenland shark, can live for centuries. 🦈✨"
+    },
+    {
+      match: ["what is the smallest bone in the human body"],
+      question: "What is the smallest bone in the human body?",
+      answer: "The stapes, located in the ear, is the smallest bone in the human body. 👂✨"
+    },
+    {
+      match: ["what is the strongest muscle in the human body"],
+      question: "What is the strongest muscle in the human body?",
+      answer: "The masseter, used for chewing, is often called the strongest muscle relative to its size. 😬"
+    },
+    {
+      match: ["how many hearts does an earthworm have"],
+      question: "How many hearts does an earthworm have?",
+      answer: "An earthworm has 5 pairs of aortic arches that function like hearts. 🪱✨"
+    },
+    {
+      match: ["what gas do plants release during photosynthesis"],
+      question: "What gas do plants release during photosynthesis?",
+      answer: "Plants release oxygen during photosynthesis. 🌱💨"
+    },
+    {
+      match: ["what is the freezing point of water"],
+      question: "What is the freezing point of water?",
+      answer: "Water freezes at 0°C (32°F). ❄️"
+    },
+    {
+      match: ["what planet is known as the red planet"],
+      question: "What planet is known as the Red Planet?",
+      answer: "Mars is known as the Red Planet. 🔴🪐"
+    },
+    {
+      match: ["what is a light-year"],
+      question: "What is a light-year?",
+      answer: "A light-year is the distance light travels in one year, used to measure vast distances in space. ✨🌌"
+    },
+    {
+      match: ["what causes thunder"],
+      question: "What causes thunder?",
+      answer: "Thunder is caused by rapid expansion of air heated by a lightning bolt. ⚡🌩️"
+    },
+    {
+      match: ["what is the hottest planet in the solar system"],
+      question: "What is the hottest planet in the solar system?",
+      answer: "Venus is the hottest planet due to its thick, heat-trapping atmosphere. 🔥🪐"
+    },
+    {
+      match: ["why do we have leap years"],
+      question: "Why do we have leap years?",
+      answer: "Leap years keep our calendar in sync with Earth's orbit around the Sun, which takes slightly more than 365 days. 📅✨"
+    },
+    {
+      match: ["what is the currency of the united states"],
+      question: "What is the currency of the United States?",
+      answer: "The currency of the United States is the US dollar. 💵"
+    },
+    {
+      match: ["what is the currency of india"],
+      question: "What is the currency of India?",
+      answer: "The currency of India is the Indian rupee. ₹"
+    },
+    {
+      match: ["what language has the most native speakers"],
+      question: "What language has the most native speakers?",
+      answer: "Mandarin Chinese has the most native speakers in the world. 🈶✨"
+    },
+    {
+      match: ["how many letters are in the english alphabet"],
+      question: "How many letters are in the English alphabet?",
+      answer: "There are 26 letters in the English alphabet. 🔤"
+    },
+    {
+      match: ["what is the opposite of \"ancient\""],
+      question: "What is the opposite of \"ancient\"?",
+      answer: "The opposite of \"ancient\" is \"modern.\" ✨"
+    },
+    {
+      match: ["what is a palindrome"],
+      question: "What is a palindrome?",
+      answer: "A palindrome is a word or phrase that reads the same backward as forward, like \"level.\" 🔁"
+    },
+    {
+      match: ["what does \"tbh\" mean"],
+      question: "What does \"TBH\" mean?",
+      answer: "\"TBH\" means \"to be honest.\" 😭"
+    },
+    {
+      match: ["what does \"idk\" mean"],
+      question: "What does \"IDK\" mean?",
+      answer: "\"IDK\" means \"I don't know.\" 🤷‍♀️"
+    },
+    {
+      match: ["what does \"fyi\" mean"],
+      question: "What does \"FYI\" mean?",
+      answer: "\"FYI\" means \"for your information.\" 📌"
+    },
+    {
+      match: ["how many strings does a standard guitar have"],
+      question: "How many strings does a standard guitar have?",
+      answer: "A standard guitar has 6 strings. 🎸"
+    },
+    {
+      match: ["how many keys are on a standard piano"],
+      question: "How many keys are on a standard piano?",
+      answer: "A standard piano has 88 keys. 🎹"
+    },
+    {
+      match: ["what is the world's best-selling toy"],
+      question: "What is the world's best-selling toy?",
+      answer: "The Rubik's Cube is often cited as one of the best-selling toys of all time. 🧩✨"
+    },
+    {
+      match: ["what is archimedes known for", "who is archimedes"],
+      question: "What is Archimedes known for?",
+      answer: "Archimedes is known for his discoveries about buoyancy and density (the famous \"Eureka!\" moment)."
+    },
+    {
+      match: ["what is niels bohr known for", "who is niels bohr"],
+      question: "What is Niels Bohr known for?",
+      answer: "Niels Bohr is known for his model of the atom."
+    },
+    {
+      match: ["what is marie curie known for", "who is marie curie"],
+      question: "What is Marie Curie known for?",
+      answer: "Marie Curie is known for her pioneering work on radioactivity."
+    },
+    {
+      match: ["what is charles darwin known for", "who is charles darwin"],
+      question: "What is Charles Darwin known for?",
+      answer: "Charles Darwin is known for his theory of evolution by natural selection."
+    },
+    {
+      match: ["what is thomas edison known for", "who is thomas edison"],
+      question: "What is Thomas Edison known for?",
+      answer: "Thomas Edison is known for inventing the practical electric light bulb."
+    },
+    {
+      match: ["what is michael faraday known for", "who is michael faraday"],
+      question: "What is Michael Faraday known for?",
+      answer: "Michael Faraday is known for discovering electromagnetic induction."
+    },
+    {
+      match: ["what is galileo galilei known for", "who is galileo galilei"],
+      question: "What is Galileo Galilei known for?",
+      answer: "Galileo Galilei is known for his work in astronomy and the laws of motion."
+    },
+    {
+      match: ["what is stephen hawking known for", "who is stephen hawking"],
+      question: "What is Stephen Hawking known for?",
+      answer: "Stephen Hawking is known for his research on black holes."
+    },
+    {
+      match: ["what is ibn al-haytham known for", "who is ibn al-haytham"],
+      question: "What is Ibn al-Haytham known for?",
+      answer: "Ibn al-Haytham is known for his groundbreaking work on optics and vision."
+    },
+    {
+      match: ["what is jagadish chandra bose known for", "who is jagadish chandra bose"],
+      question: "What is Jagadish Chandra Bose known for?",
+      answer: "Jagadish Chandra Bose is known for his research on plant response to stimuli."
+    },
+    {
+      match: ["what is johannes kepler known for", "who is johannes kepler"],
+      question: "What is Johannes Kepler known for?",
+      answer: "Johannes Kepler is known for his laws of planetary motion."
+    },
+    {
+      match: ["what is antoine lavoisier known for", "who is antoine lavoisier"],
+      question: "What is Antoine Lavoisier known for?",
+      answer: "Antoine Lavoisier is known for formulating the law of conservation of mass."
+    },
+    {
+      match: ["what is gregor mendel known for", "who is gregor mendel"],
+      question: "What is Gregor Mendel known for?",
+      answer: "Gregor Mendel is known for founding the science of genetics through his work on inheritance."
+    },
+    {
+      match: ["what is isaac newton known for", "who is isaac newton"],
+      question: "What is Isaac Newton known for?",
+      answer: "Isaac Newton is known for his laws of motion and the theory of gravity."
+    },
+    {
+      match: ["what is j robert oppenheimer known for", "who is j robert oppenheimer"],
+      question: "What is J. Robert Oppenheimer known for?",
+      answer: "J. Robert Oppenheimer is known for his pioneering work in nuclear physics."
+    },
+    {
+      match: ["what is louis pasteur known for", "who is louis pasteur"],
+      question: "What is Louis Pasteur known for?",
+      answer: "Louis Pasteur is known for developing germ theory and vaccination."
+    },
+    {
+      match: ["what is qian xuesen known for", "who is qian xuesen"],
+      question: "What is Qian Xuesen known for?",
+      answer: "Qian Xuesen is known for his contributions to space and rocketry, earning him the title \"Father of Chinese space\"."
+    },
+    {
+      match: ["what is c v raman known for", "who is c v raman"],
+      question: "What is C. V. Raman known for?",
+      answer: "C. V. Raman is known for discovering the Raman effect, related to the scattering of light."
+    },
+    {
+      match: ["what is nikola tesla known for", "who is nikola tesla"],
+      question: "What is Nikola Tesla known for?",
+      answer: "Nikola Tesla is known for his work on AC electricity and wireless power."
+    },
+    {
+      match: ["what is alan turing known for", "who is alan turing"],
+      question: "What is Alan Turing known for?",
+      answer: "Alan Turing is known for laying the foundations of computer science."
+    },
+    {
+      match: ["what is harold urey known for", "who is harold urey"],
+      question: "What is Harold Urey known for?",
+      answer: "Harold Urey is known for discovering deuterium."
+    },
+    {
+      match: ["what is alessandro volta known for", "who is alessandro volta"],
+      question: "What is Alessandro Volta known for?",
+      answer: "Alessandro Volta is known for inventing the first electric battery."
+    },
+    {
+      match: ["what is james watt known for", "who is james watt"],
+      question: "What is James Watt known for?",
+      answer: "James Watt is known for improving the steam engine."
+    },
+    {
+      match: ["what is xu guangqi known for", "who is xu guangqi"],
+      question: "What is Xu Guangqi known for?",
+      answer: "Xu Guangqi is known for his work in agriculture and science exchange."
+    },
+    {
+      match: ["what is hideki yukawa known for", "who is hideki yukawa"],
+      question: "What is Hideki Yukawa known for?",
+      answer: "Hideki Yukawa is known for his meson theory of the nuclear force."
+    },
+    {
+      match: ["what is zacharias janssen known for", "who is zacharias janssen"],
+      question: "What is Zacharias Janssen known for?",
+      answer: "Zacharias Janssen is known for the invention of the microscope."
+    },
+    {
+      match: ["who is the current un secretary-general", "who is the un secretary general"],
+      question: "Who is the current UN Secretary-General?",
+      answer: "António Guterres of Portugal is the current UN Secretary-General, serving since 2017."
+    },
+    {
+      match: ["who is the richest person in the world", "richest person in the world"],
+      question: "Who is the richest person in the world?",
+      answer: "Elon Musk is currently the richest person in the world, according to Forbes."
+    },
+    {
+      match: ["what is the current world population", "what is the world population"],
+      question: "What is the current world population?",
+      answer: "The world population is estimated at around 8.3 billion people."
+    },
+    {
+      match: ["what is the tallest building in the world", "tallest building in the world"],
+      question: "What is the tallest building in the world?",
+      answer: "The Burj Khalifa in Dubai is the tallest building in the world, at 828 meters."
+    },
+    {
+      match: ["what is the current pope", "who is the current pope", "who is the pope"],
+      question: "Who is the current Pope?",
+      answer: "Pope Leo XIV is the current Pope, elected in May 2025."
+    },
+    {
+      match: ["what is the largest lake in the world", "largest lake in the world"],
+      question: "What is the largest lake in the world?",
+      answer: "The Caspian Sea is the largest lake in the world by area."
+    },
+    {
+      match: ["what is the smallest ocean", "smallest ocean in the world"],
+      question: "What is the smallest ocean?",
+      answer: "The Arctic Ocean is the smallest of the world's oceans."
+    },
+    {
+      match: ["what is the longest mountain range", "longest mountain range in the world"],
+      question: "What is the longest mountain range in the world?",
+      answer: "The Andes in South America is the longest mountain range in the world."
+    },
+    {
+      match: ["what is the largest religion in the world", "largest religion in the world"],
+      question: "What is the largest religion in the world?",
+      answer: "Christianity is the largest religion in the world by number of adherents."
+    },
+    {
+      match: ["what is the most populous city in the world", "most populous city in the world"],
+      question: "What is the most populous city in the world?",
+      answer: "Tokyo is generally considered the world's most populous metropolitan area."
+    },
+    {
+      match: ["who is the ceo of tesla"],
+      question: "Who is the CEO of Tesla?",
+      answer: "Elon Musk is the CEO of Tesla."
+    },
+    {
+      match: ["who is the ceo of amazon"],
+      question: "Who is the CEO of Amazon?",
+      answer: "Andy Jassy is the CEO of Amazon."
+    },
+    {
+      match: ["who is the ceo of microsoft"],
+      question: "Who is the CEO of Microsoft?",
+      answer: "Satya Nadella is the CEO of Microsoft."
+    },
+    {
+      match: ["who is the ceo of apple"],
+      question: "Who is the CEO of Apple?",
+      answer: "Tim Cook is the CEO of Apple."
+    },
+    {
+      match: ["who is the ceo of google", "who is the ceo of alphabet"],
+      question: "Who is the CEO of Google?",
+      answer: "Sundar Pichai is the CEO of Google and its parent company, Alphabet."
+    },
+    {
+      match: ["what is the largest company in the world by market cap", "largest company by market cap"],
+      question: "What is the largest company in the world by market cap?",
+      answer: "Companies like Apple, Microsoft, and Nvidia have all held the title of world's most valuable company by market cap in recent years, with the top spot shifting often."
+    },
+    {
+      match: ["what is the most widely spoken language in the world"],
+      question: "What is the most widely spoken language in the world?",
+      answer: "English is the most widely spoken language in the world when counting both native and second-language speakers."
+    },
+    {
+      match: ["what is the largest island in the world", "largest island in the world"],
+      question: "What is the largest island in the world?",
+      answer: "Greenland is the largest island in the world."
+    },
+    {
+      match: ["what is the driest place on earth", "driest place on earth"],
+      question: "What is the driest place on Earth?",
+      answer: "The Atacama Desert in Chile is considered one of the driest places on Earth."
+    },
+    {
+      match: ["what is the coldest place on earth", "coldest place on earth"],
+      question: "What is the coldest place on Earth?",
+      answer: "The coldest naturally occurring temperatures on Earth have been recorded in Antarctica."
+    },
+    {
+      match: ["what is the largest rainforest in the world", "largest rainforest in the world"],
+      question: "What is the largest rainforest in the world?",
+      answer: "The Amazon Rainforest is the largest rainforest in the world."
+    },
+    {
+      match: ["what is the most visited country in the world", "most visited country in the world"],
+      question: "What is the most visited country in the world?",
+      answer: "France is generally considered the world's most visited country by international tourist arrivals."
+    },
+    {
+      match: ["what is the largest coral reef in the world", "largest coral reef in the world"],
+      question: "What is the largest coral reef in the world?",
+      answer: "The Great Barrier Reef off Australia is the largest coral reef system in the world."
+    },
+    {
+      match: ["who holds the record for fastest 100m sprint", "fastest 100m sprint record"],
+      question: "Who holds the record for the fastest 100m sprint?",
+      answer: "Usain Bolt holds the world record for the 100m sprint, with a time of 9.58 seconds."
+    },
+    {
+      match: ["what is the deepest lake in the world", "deepest lake in the world"],
+      question: "What is the deepest lake in the world?",
+      answer: "Lake Baikal in Russia is the deepest lake in the world."
+    }
+  ];
+
+  // general arithmetic solver — handles "2+2", "what is 12 * 8", "15 divided by 3", etc.
+  function tryArithmetic(rawQuery){
+    let q = rawQuery.toLowerCase().trim();
+    q = q.replace(/[?]/g, '');
+    q = q.replace(/^(what('?s| is)|whats|calculate|solve)\s+/, '');
+    q = q
+      .replace(/×/g, '*')
+      .replace(/÷/g, '/')
+      .replace(/\btimes\b|\bmultiplied by\b|\bx\b/g, '*')
+      .replace(/\bdivided by\b|\bover\b/g, '/')
+      .replace(/\bplus\b/g, '+')
+      .replace(/\bminus\b/g, '-');
+    q = q.replace(/\s+/g, '');
+
+    if(!/^[0-9+\-*/.()]+$/.test(q)) return null;
+    if(!/[+\-*/]/.test(q)) return null;
+    if(!/[0-9]/.test(q)) return null;
+
+    let result;
+    try{
+      result = Function('"use strict"; return (' + q + ')')();
+    }catch(e){
+      return null;
+    }
+    if(typeof result !== 'number' || !isFinite(result)) return null;
+
+    result = Math.round(result * 1e6) / 1e6;
+    return {
+      question: rawQuery.trim(),
+      answer: String(result)
+    };
+  }
+
+  function normalize(str){
+    return str
+      .toLowerCase()
+      .trim()
+      .replace(/[?!.,]/g, '')
+      .replace(/\s+/g, ' ');
+  }
+
+  function escapeRegExp(s){
+    return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  function findWhimsyAnswer(query){
+    const n = normalize(query);
+
+    // exact match first
+    const exact = whimsyAnswers.find(entry => entry.match.includes(n));
+    if(exact) return exact;
+
+    // fallback: the query appears as a whole word/phrase inside a known match string
+    // (so "newton" finds "who is isaac newton", not just the full phrase)
+    if(n.length >= 3){
+      const pattern = new RegExp('(^|\\s)' + escapeRegExp(n) + '($|\\s)');
+      const partial = whimsyAnswers.find(entry =>
+        entry.match.some(m => pattern.test(m))
+      );
+      if(partial) return partial;
+    }
+
+    return null;
+  }
+
+  function showAnswer(entry){
+    document.getElementById('answerQ').textContent = entry.question;
+    document.getElementById('answerA').textContent = entry.answer;
+
+    const linkEl = document.getElementById('answerLink');
+    if(entry.link){
+      linkEl.href = entry.link;
+      linkEl.textContent = 'Open ' + entry.link.replace('https://', '').replace('http://', '') + ' ↗';
+      linkEl.hidden = false;
+    } else {
+      linkEl.hidden = true;
+      linkEl.removeAttribute('href');
+    }
+
+    document.getElementById('answerCard').hidden = false;
+  }
+
+  function hideAnswer(){
+    document.getElementById('answerCard').hidden = true;
+  }
+
+  // recognize common website names/URLs and send the person straight there
+  const knownSites = {
+    'youtube': 'https://youtube.com',
+    'google': 'https://google.com',
+    'facebook': 'https://facebook.com',
+    'instagram': 'https://instagram.com',
+    'twitter': 'https://twitter.com',
+    'x': 'https://x.com',
+    'netflix': 'https://netflix.com',
+    'amazon': 'https://amazon.com',
+    'wikipedia': 'https://wikipedia.org',
+    'reddit': 'https://reddit.com',
+    'tiktok': 'https://tiktok.com',
+    'spotify': 'https://spotify.com',
+    'whatsapp': 'https://whatsapp.com',
+    'pinterest': 'https://pinterest.com',
+    'linkedin': 'https://linkedin.com',
+    'github': 'https://github.com',
+    'gmail': 'https://mail.google.com',
+    'yahoo': 'https://yahoo.com',
+    'bing': 'https://bing.com',
+    'duckduckgo': 'https://duckduckgo.com',
+    'twitch': 'https://twitch.tv',
+    'discord': 'https://discord.com',
+    'snapchat': 'https://snapchat.com',
+    'ebay': 'https://ebay.com',
+    'quora': 'https://quora.com',
+    'canva': 'https://canva.com',
+    'claude': 'https://claude.ai',
+    'chatgpt': 'https://chatgpt.com'
+  };
+
+  function findKnownSite(query){
+    let n = normalize(query);
+    // strip common wrapper words like "open", "go to", "take me to", trailing ".com"
+    n = n.replace(/^(open|go to|take me to|visit)\s+/, '');
+    n = n.replace(/\.(com|org|net|tv|ai)$/, '');
+    n = n.replace(/^www\./, '');
+    n = n.trim();
+    return knownSites[n] || null;
+  }
+
+  function doSearch(){
+    const q = document.getElementById('searchInput').value.trim();
+    if(!q) return;
+
+    const found = findWhimsyAnswer(q);
+    if(found){
+      showAnswer(found);
+      return;
+    }
+
+    const sum = tryArithmetic(q);
+    if(sum){
+      showAnswer(sum);
+      return;
+    }
+
+    const site = findKnownSite(q);
+    if(site){
+      showAnswer({
+        question: q,
+        answer: 'Here you go! 🌷',
+        link: site
+      });
+      return;
+    }
+
+    showAnswer({ question: q, answer: 'Information not available.' });
+  }
+
+  document.getElementById('searchForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    doSearch();
+  });
+  document.getElementById('searchBtn').addEventListener('click', doSearch);
+
+  const searchInputEl = document.getElementById('searchInput');
+  const clearBtnEl = document.getElementById('clearBtn');
+
+  function refreshClearBtn(){
+    clearBtnEl.hidden = searchInputEl.value.length === 0;
+  }
+
+  searchInputEl.addEventListener('input', function(){
+    hideAnswer();
+    refreshClearBtn();
+  });
+
+  clearBtnEl.addEventListener('click', function(){
+    searchInputEl.value = '';
+    refreshClearBtn();
+    hideAnswer();
+    searchInputEl.focus();
+  });
+
+  refreshClearBtn();
+
+  document.getElementById('answerClose').addEventListener('click', hideAnswer);
+
+  document.getElementById('luckyBtn').addEventListener('click', function(){
+    showAnswer({
+      question: "I'm Feeling Whimsical",
+      answer: 'YASSSS ✨🌷🧚🏻\u200d♀️💗\nWhimsical mode: ACTIVATED 🎀☁️🦋\n\nImagine:\n🌙 a tiny moon hanging from a silver thread\n🍓 strawberries growing in little teacups\n🧚🏻\u200d♀️ fairies leaving sparkles on windowsills\n🌸 flowers having secret conversations at midnight\n🐇 a bunny with a tiny satchel going on important adventures\n☁️ clouds shaped like hearts drifting through a lavender sky\n📖 an old storybook that opens to a page written just for you\n\nToday we are NOT being ordinary.\nWe are being ✨✨ a little magical ✨✨\n\n૮꒰ ˶• ༝ •˶꒱ა ♡\nwelcome to the whimsical hour 🌷🫧🪽'
+    });
+  });
+
+  document.getElementById('sparkleBtn').addEventListener('click', function(){
+    const input = document.getElementById('searchInput');
+    input.focus();
+    this.style.transform = 'scale(1.25) rotate(15deg)';
+    setTimeout(() => { this.style.transform = ''; }, 220);
+  });
+
+  document.getElementById('refreshBtn').addEventListener('click', function(){
+    const overlay = document.getElementById('refreshClouds');
+    const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if(prefersReducedMotion){
+      window.location.reload();
+      return;
+    }
+
+    overlay.classList.remove('active');
+    void overlay.offsetWidth; // restart the animation even on repeat clicks
+    overlay.classList.add('active');
+
+    setTimeout(function(){
+      window.location.reload();
+    }, 1700);
+  });
+
+  document.getElementById('aboutLink').addEventListener('click', function(e){
+    e.preventDefault();
+    document.getElementById('aboutOverlay').hidden = false;
+  });
+  document.getElementById('aboutClose').addEventListener('click', function(){
+    document.getElementById('aboutOverlay').hidden = true;
+  });
+  document.getElementById('aboutOverlay').addEventListener('click', function(e){
+    if(e.target === this) this.hidden = true;
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape') document.getElementById('aboutOverlay').hidden = true;
+  });
+
+  // settings panel: choose a background color
+  (function(){
+    const settingsBtn = document.getElementById('settingsBtn');
+    const settingsPanel = document.getElementById('settingsPanel');
+    const swatches = document.querySelectorAll('.swatch');
+
+    function applyBg(bg){
+      if(bg && bg !== 'default'){
+        document.body.setAttribute('data-bg', bg);
+      } else {
+        document.body.removeAttribute('data-bg');
+      }
+      swatches.forEach(function(sw){
+        sw.classList.toggle('active', sw.dataset.bg === (bg || 'default'));
+      });
+      try{
+        localStorage.setItem('whimsy-bg', bg || 'default');
+      }catch(e){}
+    }
+
+    // restore a previously chosen color, if any
+    try{
+      const saved = localStorage.getItem('whimsy-bg');
+      if(saved) applyBg(saved);
+    }catch(e){}
+
+    settingsBtn.addEventListener('click', function(){
+      settingsPanel.hidden = !settingsPanel.hidden;
+    });
+
+    swatches.forEach(function(sw){
+      sw.addEventListener('click', function(){
+        applyBg(sw.dataset.bg);
+      });
+    });
+
+    document.addEventListener('click', function(e){
+      if(settingsPanel.hidden) return;
+      if(e.target === settingsBtn || settingsPanel.contains(e.target)) return;
+      settingsPanel.hidden = true;
+    });
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape') settingsPanel.hidden = true;
+    });
+  })();
+
+  // whimsy music: a tiny generative music-box loop, built entirely with the Web Audio API
+  (function(){
+    const musicBtn = document.getElementById('musicBtn');
+    let ctx = null;
+    let masterGain = null;
+    let padGains = [];
+    let padOscillators = [];
+    let noteTimer = null;
+    let isPlaying = false;
+
+    // C major pentatonic across two octaves, for that dreamy music-box sound
+    const scale = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33, 659.25, 783.99, 880.00];
+
+    function ensureContext(){
+      if(!ctx){
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        ctx = new AudioCtx();
+        masterGain = ctx.createGain();
+        masterGain.gain.value = 0;
+        masterGain.connect(ctx.destination);
+      }
+    }
+
+    function startPad(){
+      const freqs = [130.81, 196.00]; // soft low C and G drone
+      freqs.forEach(function(freq, i){
+        const osc = ctx.createOscillator();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.value = 800;
+
+        const gain = ctx.createGain();
+        gain.gain.value = 0.035;
+
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(masterGain);
+        osc.start();
+
+        // slow gentle drift so the drone feels alive
+        const lfo = ctx.createOscillator();
+        lfo.type = 'sine';
+        lfo.frequency.value = 0.05 + i * 0.02;
+        const lfoGain = ctx.createGain();
+        lfoGain.gain.value = 120;
+        lfo.connect(lfoGain);
+        lfoGain.connect(filter.frequency);
+        lfo.start();
+
+        padOscillators.push(osc, lfo);
+        padGains.push(gain);
+      });
+    }
+
+    function stopPad(){
+      padOscillators.forEach(function(osc){
+        try{ osc.stop(); }catch(e){}
+      });
+      padOscillators = [];
+      padGains = [];
+    }
+
+    function playNote(){
+      const freq = scale[Math.floor(Math.random() * scale.length)];
+      const now = ctx.currentTime;
+
+      const osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.16, now + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.6);
+
+      const panner = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
+      if(panner){ panner.pan.value = (Math.random() * 1.4) - 0.7; }
+
+      osc.connect(gain);
+      if(panner){ gain.connect(panner); panner.connect(masterGain); }
+      else{ gain.connect(masterGain); }
+
+      osc.start(now);
+      osc.stop(now + 1.7);
+    }
+
+    function scheduleNotes(){
+      playNote();
+      const nextIn = 550 + Math.random() * 700;
+      noteTimer = setTimeout(scheduleNotes, nextIn);
+    }
+
+    function startMusic(){
+      ensureContext();
+      if(ctx.state === 'suspended'){ ctx.resume(); }
+      startPad();
+      scheduleNotes();
+      const now = ctx.currentTime;
+      masterGain.gain.cancelScheduledValues(now);
+      masterGain.gain.setValueAtTime(masterGain.gain.value, now);
+      masterGain.gain.linearRampToValueAtTime(1, now + 1.2);
+      isPlaying = true;
+      musicBtn.classList.add('playing');
+      musicBtn.textContent = '🎶';
+    }
+
+    function stopMusic(){
+      if(!ctx) return;
+      const now = ctx.currentTime;
+      masterGain.gain.cancelScheduledValues(now);
+      masterGain.gain.setValueAtTime(masterGain.gain.value, now);
+      masterGain.gain.linearRampToValueAtTime(0, now + 0.8);
+      clearTimeout(noteTimer);
+      setTimeout(stopPad, 850);
+      isPlaying = false;
+      musicBtn.classList.remove('playing');
+      musicBtn.textContent = '🎵';
+    }
+
+    musicBtn.addEventListener('click', function(){
+      if(isPlaying){ stopMusic(); }
+      else{ startMusic(); }
+    });
+  })();
+</script>
+
+</body>
+</html>
